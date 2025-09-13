@@ -19,8 +19,11 @@ define('mod_valuemapdoc/tabulatormap', [
 ) {
 
     return {
-        init: function() {
+        init: function(courseid, cmid, filtercmid, columns) {
+
             console.log('[tabulatormap] Module loaded');
+            console.log('[tabulatormap] Course ID:', courseid, 'CM ID:', cmid, 'Filter CM ID:', filtercmid);
+            console.log('[tabulatormap] Columns:', columns);
 
             var el = document.querySelector('#valuemap-table-js');
             if (!el) {
@@ -28,10 +31,16 @@ define('mod_valuemapdoc/tabulatormap', [
                 return;
             }
 
-            var columns = JSON.parse(el.dataset.columns);
-            var courseid = el.dataset.courseid;
-            var cmid = el.dataset.cmid;
-            var filtercmid = el.dataset.filtercmid || '';
+            var jsonText = document.getElementById('valuemap-columns').textContent;
+            //var columns = JSON.parse(jsonText);
+
+
+           // var columns = JSON.parse(el.dataset.columns);
+
+
+          //  var courseid = el.dataset.courseid;
+          //  var cmid = el.dataset.cmid;
+          //  var filtercmid = el.dataset.filtercmid || '';
             var groupfilterEl = document.querySelector('#groupfilter');
             var groupid = groupfilterEl ? groupfilterEl.value : 0;
 

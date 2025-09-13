@@ -206,7 +206,14 @@
     {{/readonly_toggle.show_toggle}}
 </div>
 
-{{#js}}
+
+
+<script type="application/json" id="valuemap-columns">
+{{{columns}}}
+</script>
+
+<!-- JavaScript Initialization 
+{ {#js} }
 // Initialize table when DOM is ready
 require(['mod_valuemapdoc/tabulatormap'], function(TabulatorMap) {
     TabulatorMap.init();
@@ -228,4 +235,5 @@ require(['mod_valuemapdoc/tabulatormap'], function(TabulatorMap) {
         });
     }
 });
-{{/js}}
+{ {/js} }
+-->

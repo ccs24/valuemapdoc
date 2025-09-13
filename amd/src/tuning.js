@@ -7,6 +7,11 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
 
             var isLoading = false; // Czy trwa zapytanie
 
+            /**
+             * 
+             * @param {*} promptText 
+             * @returns 
+             */
             function sendToGpt(promptText) {
                 if (isLoading) {
                     return; // Jeśli ładowanie, ignoruj kliknięcie

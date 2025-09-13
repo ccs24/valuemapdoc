@@ -76,8 +76,8 @@ define([], function() {
                                 function checkDocumentsReady() {
                                     require(['core/ajax'], function(Ajax) {
                                         var container = document.querySelector('#valuemapdoc-content-table');
-                                        if (!container) { 
-                                            return; 
+                                        if (!container) {
+                                            return;
                                         }
 
                                         var courseid = container.dataset.courseid;

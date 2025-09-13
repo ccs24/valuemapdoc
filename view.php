@@ -140,6 +140,18 @@ foreach ($templates as $template) {
     $grouped_templates[$template->templatetype][] = $template;
 }
 
+$columnsjson = json_encode(array_map(function($c) {
+        return [
+            'title' => get_string($c, 'mod_valuemapdoc'),
+            'field' => $c,
+            'hozAlign' => 'left',
+            'headerSort' => true,
+            'width' => 150
+        ];
+    }, $columns), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+
+
+
 // Prepare data for template
 $tablecontent = [
     'contextid' => $context->id,
@@ -150,7 +162,7 @@ $tablecontent = [
     'has_intro' => !empty($valuemapdoc->intro),
     'can_add' => !$readonly_mode,
     'can_edit' => !$readonly_mode,
-    'can_delete' => !$readonly_mode && has_capability('mod/valuemapdoc:manageentries ', $context),
+    'can_delete' => !$readonly_mode && has_capability('mod/valuemapdoc:manageentries', $context),
     'can_generate' => true,
     'selectedfilter' => $selectedfilter,
     'filtercmid' => $selectedfilter,
@@ -160,16 +172,7 @@ $tablecontent = [
     'masteroptions' => $options,
     
     // Dynamic columns based on user's field level
-    'columns' => json_encode(array_map(function($c) {
-        return [
-            'title' => get_string($c, 'mod_valuemapdoc'),
-            'field' => $c,
-            'hozAlign' => 'left',
-            'headerSort' => true,
-            'width' => 150
-        ];
-    }, $columns), JSON_HEX_APOS | JSON_HEX_QUOT),
-
+    'columns' => $columnsjson,
     'tabulatordata' => [
         'courseid' => $course->id,
         'cmid' => $cm->id,
@@ -220,7 +223,8 @@ $renderer = $PAGE->get_renderer('mod_valuemapdoc');
 $PAGE->requires->js_call_amd('mod_valuemapdoc/tabulatormap', 'init', [
     'courseid' => $course->id,
     'cmid' => $cm->id,
-    'filtercmid' => $selectedfilter
+    'filtercmid' => $selectedfilter,
+    'columns' => $columns
 ]);
 
 echo $OUTPUT->header();
