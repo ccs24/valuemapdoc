@@ -7,7 +7,7 @@
 // (at your option) any later version.
 
 require_once('../../config.php');
-/* require_once($CFG->dirroot . '/mod/valuemapdoc/classes/local/field_levels.php');
+require_once($CFG->dirroot . '/mod/valuemapdoc/classes/local/field_levels.php');
 
 use mod_valuemapdoc\local\field_levels;
 
@@ -37,6 +37,12 @@ $PAGE->set_context($context);
 $user_fields = field_levels::get_user_fields();
 $user_level_config = field_levels::get_user_level_config();
 
+// Pobierz preferencje użytkownika TUTAJ
+// $user_preference = get_user_preference('mod_valuemapdoc_field_level', 'basic');
+// $user_level = field_levels::get_user_level_from_preference($user_preference);
+
+
+
 // Define all possible columns
 $all_columns = [
     'market', 'industry', 'role', 'businessgoal', 'strategy', 'difficulty',
@@ -49,16 +55,16 @@ $all_columns = [
 $columns = array_intersect($all_columns, $user_fields);
 
 // Handle readonly mode
-$readonly_forced = !has_capability('mod/valuemapdoc:manage', $context);
-$can_toggle_readonly = has_capability('mod/valuemapdoc:manage', $context);
+$readonly_forced = !has_capability('mod/valuemapdoc:manageentries', $context);
+$can_toggle_readonly = has_capability('mod/valuemapdoc:manageentries', $context);
 
 // If readonly parameter is set and user can toggle, use it
 if ($readonly !== -1 && $can_toggle_readonly) {
     $readonly_mode = (bool)$readonly;
-    set_user_preference('mod_valuemapdoc_readonly_' . $cm->id, $readonly_mode);
+    set_user_preferences('mod_valuemapdoc_readonly_' . $cm->id, $readonly_mode);
 } else {
     // Otherwise use saved preference or default based on permissions
-    $readonly_mode = get_user_preference('mod_valuemapdoc_readonly_' . $cm->id, $readonly_forced);
+    $readonly_mode = get_user_preferences('mod_valuemapdoc_readonly_' . $cm->id, $readonly_forced);
 }
 
 // Force readonly if user doesn't have manage capability
@@ -93,10 +99,23 @@ $sql = "SELECT cm.id as cmid, c.shortname, v.name
 
 $masterinstances = $DB->get_records_sql($sql, [$course->id]);
 
-$options = ['' => get_string('nomasterfilter', 'mod_valuemapdoc')];
+/*$options = ['' => get_string('nomasterfilter', 'mod_valuemapdoc')];
 foreach ($masterinstances as $instance) {
     $options[$instance->cmid] = $instance->shortname . ': ' . $instance->name;
 }
+    */
+$options = [];
+foreach ($masterinstances as $instance) {
+    $options[] = (object)[
+        'key' => $instance->cmid,
+        'label' => $instance->shortname . ': ' . $instance->name,
+        'selected' => ($selectedfilter == $instance->cmid)
+    ];
+}
+
+//var_dump($options);
+//die();
+
 
 $classmaster = '';
 if (!empty($selectedfilter)) {
@@ -131,7 +150,7 @@ $tablecontent = [
     'has_intro' => !empty($valuemapdoc->intro),
     'can_add' => !$readonly_mode,
     'can_edit' => !$readonly_mode,
-    'can_delete' => !$readonly_mode && has_capability('mod/valuemapdoc:manage', $context),
+    'can_delete' => !$readonly_mode && has_capability('mod/valuemapdoc:manageentries ', $context),
     'can_generate' => true,
     'selectedfilter' => $selectedfilter,
     'filtercmid' => $selectedfilter,
@@ -194,6 +213,9 @@ $tablecontent = [
     ]
 ];
 
+//var_dump($tablecontent);    
+//die();
+
 $renderer = $PAGE->get_renderer('mod_valuemapdoc');
 $PAGE->requires->js_call_amd('mod_valuemapdoc/tabulatormap', 'init', [
     'courseid' => $course->id,
@@ -204,6 +226,5 @@ $PAGE->requires->js_call_amd('mod_valuemapdoc/tabulatormap', 'init', [
 echo $OUTPUT->header();
 echo $renderer->render_from_template('mod_valuemapdoc/view', $tablecontent);
 echo $OUTPUT->footer();
-*/
 
-echo "VIEW.PHP";
+

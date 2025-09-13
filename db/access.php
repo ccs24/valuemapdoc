@@ -80,6 +80,8 @@ $capabilities = [
         ]
     ],
 
+
+    
     'mod/valuemapdoc:view' => [
     'captype' => 'read',
     'contextlevel' => CONTEXT_MODULE,

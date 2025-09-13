@@ -10,6 +10,10 @@ namespace mod_valuemapdoc\local;
 
 defined('MOODLE_INTERNAL') || die();
 
+//use function get_user_preference;  
+//use function set_user_preference; 
+
+
 /**
  * Helper class for managing field visibility levels in Value Map module
  *
@@ -33,8 +37,8 @@ class field_levels {
     public static function get_levels() {
         return [
             'basic' => [
-                'name' => get_string('level_basic', 'mod_valuemapdoc'),
-                'description' => get_string('level_basic_desc', 'mod_valuemapdoc'),
+                'name' => \get_string('level_basic', 'mod_valuemapdoc'),
+                'description' => \get_string('level_basic_desc', 'mod_valuemapdoc'),
                 'fields_count' => 7,
                 'fields' => [
                     'market',
@@ -47,8 +51,8 @@ class field_levels {
                 ]
             ],
             'valueproposition' => [
-                'name' => get_string('level_valueproposition', 'mod_valuemapdoc'),
-                'description' => get_string('level_valueproposition_desc', 'mod_valuemapdoc'),
+                'name' => \get_string('level_valueproposition', 'mod_valuemapdoc'),
+                'description' => \get_string('level_valueproposition_desc', 'mod_valuemapdoc'),
                 'fields_count' => 13,
                 'fields' => [
                     // PODSTAWOWY (7 pól)
@@ -69,8 +73,8 @@ class field_levels {
                 ]
             ],
             'marketing' => [
-                'name' => get_string('level_marketing', 'mod_valuemapdoc'),
-                'description' => get_string('level_marketing_desc', 'mod_valuemapdoc'),
+                'name' => \get_string('level_marketing', 'mod_valuemapdoc'),
+                'description' => \get_string('level_marketing_desc', 'mod_valuemapdoc'),
                 'fields_count' => 20,
                 'fields' => [
                     // PODSTAWOWY (7 pól)
@@ -101,21 +105,55 @@ class field_levels {
         ];
     }
     
+
+
+
+/**
+ * Get user's current field level with explicit preference
+ */
+public static function get_user_level_from_preference($preference) {
+    $levels = self::get_levels();
+
+    if (!array_key_exists($preference, $levels)) {
+        return self::DEFAULT_LEVEL;
+    }
+
+    return $preference;
+}
+
     /**
      * Get user's current field level
      *
      * @param int|null $userid User ID (null for current user)
      * @return string Current level key
      */
+     
     public static function get_user_level($userid = null) {
-        global $USER;
+        global $USER, $CFG, $DB;
         
+        if (!\isloggedin()) {
+            return self::DEFAULT_LEVEL; // Default level for guests 
+        }
+
         if ($userid === null) {
             $userid = $USER->id;
         }
-        
-        $preference = get_user_preference(self::PREFERENCE_KEY, self::DEFAULT_LEVEL, $userid);
-        
+
+//        require_once('../../config.php');
+
+
+//var_dump(get_defined_functions()['user']); // pokaże funkcje użytkownika
+//die(); // zatrzymaj tutaj że
+
+
+        // Upewnij się że Moodle jest załadowany
+//        if (!\function_exists('\get_user_preference')) {
+//            require_once($CFG->dirroot . '/lib/moodlelib.php');
+//            require_once($CFG->dirroot.'/user/externallib.php');
+//        }
+
+        $preference = get_user_preferences(self::PREFERENCE_KEY, self::DEFAULT_LEVEL, $userid);
+
         // Validate that the preference is a valid level
         $levels = self::get_levels();
         if (!array_key_exists($preference, $levels)) {
@@ -124,6 +162,7 @@ class field_levels {
         
         return $preference;
     }
+        
     
     /**
      * Set user's field level
@@ -145,7 +184,7 @@ class field_levels {
             return false;
         }
         
-        return set_user_preference(self::PREFERENCE_KEY, $level, $userid);
+        return \set_user_preference(self::PREFERENCE_KEY, $level, $userid);
     }
     
     /**
@@ -217,7 +256,7 @@ class field_levels {
         
         foreach ($levels as $key => $config) {
             $options[$key] = $config['name'] . ' (' . $config['fields_count'] . ' ' . 
-                            get_string('fields', 'mod_valuemapdoc') . ')';
+                            \get_string('fields', 'mod_valuemapdoc') . ')';
         }
         
         return $options;

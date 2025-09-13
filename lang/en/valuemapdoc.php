@@ -548,3 +548,6 @@ $string['readonly_mode_help'] = 'When enabled, you can only view entries without
 // Navigation strings
 $string['back_to_view'] = 'Back to View';
 $string['back_to_activity'] = 'Back to Activity';
+
+$string['allgroups'] = 'All groups'; 
+$string['nomasterfilter'] = 'No master filter';

@@ -70,11 +70,13 @@
         <div class="btn-group mr-2" role="group">
             <select id="masterfilter" class="form-control form-control-sm {{classmaster}}">
                 {{#masteroptions}}
-                <option value="{{@key}}" {{#selected}}selected{{/selected}}>{{.}}</option>
+                <option value="{{key}}" {{#selected}}selected{{/selected}}>{{label}}</option>
                 {{/masteroptions}}
             </select>
         </div>
         {{/masteroptions}}
+
+        
 
         <!-- Group Filter -->
         {{#groupoptions}}
