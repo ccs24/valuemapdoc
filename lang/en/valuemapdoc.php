@@ -463,3 +463,88 @@ $string['visibility_shared'] = 'ALL users';
 
 $string['nogroupaccess'] = 'You cannot access this activity because you are not a member of any group.';
 $string['nopermission'] = 'You do not have permission to access this resource.';
+
+
+// This file contains additional language strings for field level functionality
+// Add these strings to your existing lang/en/valuemapdoc.php file
+
+// Field levels
+$string['level_basic'] = 'Basic';
+$string['level_basic_desc'] = 'Essential fields for beginners - covers the core value map elements';
+$string['level_valueproposition'] = 'Value Proposition';
+$string['level_valueproposition_desc'] = 'Extended fields for developing complete value propositions';
+$string['level_marketing'] = 'Marketing';
+$string['level_marketing_desc'] = 'Complete field set for comprehensive marketing analysis';
+
+// Preferences
+$string['field_level_preferences'] = 'Field Level Preferences';
+$string['current_level'] = 'Current level';
+$string['select_field_level'] = 'Select field level';
+$string['select_field_level_help'] = 'Choose the complexity level that matches your experience. You can change this anytime.';
+$string['fields'] = 'fields';
+$string['fields_included'] = 'Fields included';
+$string['save_preferences'] = 'Save Preferences';
+$string['preferences_saved'] = 'Preferences saved successfully.';
+$string['preferences_not_saved'] = 'Failed to save preferences.';
+$string['selected_level'] = 'Selected level';
+$string['invalid_field_level'] = 'Invalid field level selected';
+$string['preferences_explanation'] = 'Choose your preferred complexity level. Basic level shows 7 essential fields, Value Proposition level shows 13 fields for detailed analysis, and Marketing level shows all 20 fields for comprehensive planning.';
+$string['back_to_activity'] = 'Back to Activity';
+
+// Form elements
+$string['current_editing_level'] = 'Current editing level';
+$string['change_level'] = 'Change Level';
+
+// Bulk editing
+$string['bulk_edit'] = 'Bulk Edit';
+$string['bulk_editing_info'] = 'You are editing {$a} entries simultaneously.';
+$string['bulk_edit_fields'] = 'Fields to Update';
+$string['enable_field_editing'] = 'Enable editing for: {$a}';
+$string['update_information'] = 'Update Information';
+$string['bulk_update_explanation'] = 'Only enabled fields will be updated. Empty values will clear the field content for all selected entries.';
+$string['entries_to_update'] = 'Entries to be updated';
+$string['entry_id'] = 'Entry ID';
+$string['update_selected_entries'] = 'Update Selected Entries';
+$string['no_fields_selected_for_bulk_edit'] = 'Please select at least one field to edit.';
+$string['bulk_update_success'] = 'Successfully updated {$a} entries.';
+$string['bulk_update_error'] = 'Error occurred while updating entries.';
+$string['bulk_editing_at_level'] = 'Bulk editing at level: {$a->level_name} ({$a->fields_count} fields)';
+$string['back_to_view'] = 'Back to View';
+
+// Errors
+$string['noentriesselected'] = 'No entries selected for bulk editing.';
+$string['noentriesfound'] = 'No entries found for editing.';
+
+// Template view additions
+$string['field_level_info'] = 'Field Level: {$a->level_name} ({$a->fields_count} fields)';
+$string['change_field_level'] = 'Change Field Level';
+
+
+// Bulk edit specific strings
+$string['bulk_edit_header'] = 'Bulk edit - {$a} selected entries';
+$string['bulk_edit_instruction'] = 'Fill only the fields you want to change in all selected entries. Empty fields will remain unchanged.';
+$string['bulk_field_label'] = '{$a} (optional)';
+$string['no_fields_filled_bulk_edit'] = 'Please fill at least one field to update.';
+$string['no_changes_made'] = 'No changes were made - all fields were empty.';
+$string['bulk_update_success'] = 'Successfully updated {$a->count} entries. Changed fields: {$a->fields}';
+$string['bulk_update_error'] = 'Error occurred while updating entries';
+
+// UI strings for bulk operations
+$string['edit_selected'] = 'Edit Selected';
+$string['duplicate_selected'] = 'Duplicate Selected';
+$string['delete_selected'] = 'Delete Selected';
+$string['search_entries'] = 'Search entries...';
+$string['generate_document'] = 'Generate Document';
+$string['select_template'] = 'Select Template';
+$string['choose_template'] = 'Choose template...';
+$string['filename_prefix'] = 'Filename Prefix';
+$string['optional'] = 'Optional';
+$string['generate'] = 'Generate';
+$string['fullscreen'] = 'Fullscreen';
+$string['export_data'] = 'Export Data';
+$string['readonly_mode'] = 'Read-only Mode';
+$string['readonly_mode_help'] = 'When enabled, you can only view entries without editing them.';
+
+// Navigation strings
+$string['back_to_view'] = 'Back to View';
+$string['back_to_activity'] = 'Back to Activity';

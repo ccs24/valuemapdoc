@@ -1,358 +1,175 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
 require_once('../../config.php');
+/* require_once($CFG->dirroot . '/mod/valuemapdoc/classes/local/field_levels.php');
 
-use mod_valuemapdoc\local\markets;
+use mod_valuemapdoc\local\field_levels;
 
-// use core\context\module as context_module;
-// use core\output\notification;
-// use core\exception\moodle_exception;
+$id = optional_param('id', 0, PARAM_INT);
+$readonly = optional_param('readonly', -1, PARAM_INT);
+$selectedfilter = optional_param('filtercmid', '', PARAM_TEXT);
+$selectedgroupid = optional_param('groupid', 0, PARAM_INT);
 
-require_login();
+if ($id) {
+    $cm = get_coursemodule_from_id('valuemapdoc', $id, 0, false, MUST_EXIST);
+    $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+    $valuemapdoc = $DB->get_record('valuemapdoc', array('id' => $cm->instance), '*', MUST_EXIST);
+} else {
+    print_error('missingidandcmid', 'mod_valuemapdoc');
+}
 
-
-
-$id = required_param('id', PARAM_INT); // course_module ID
-
-$cm = get_coursemodule_from_id('valuemapdoc', $id, 0, false, MUST_EXIST);
-$course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
-$valuemapdoc = $DB->get_record('valuemapdoc', ['id' => $cm->instance], '*', MUST_EXIST);
 require_login($course, true, $cm);
+
 $context = context_module::instance($cm->id);
-//$PAGE->set_pagelayout('embedded'); // usunie header, footer i sidebar
-$PAGE->set_url('/mod/valuemapdoc/view.php', ['id' => $id]);
-$PAGE->set_title(get_string('pluginname', 'valuemapdoc'));
-$PAGE->set_heading($course->fullname);
+
+$PAGE->set_url('/mod/valuemapdoc/view.php', array('id' => $cm->id));
+$PAGE->set_title(format_string($valuemapdoc->name));
+$PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($context);
-$PAGE->requires->js_call_amd('mod_valuemapdoc/tabs', 'init');
-// $PAGE->requires->js_call_amd('mod_valuemapdoc/bootstraploader', 'init'); // NIEUŻYWANE
-$PAGE->requires->css(new moodle_url('/mod/valuemapdoc/styles/tabulator_bootstrap5.min.css'));
-// $PAGE->requires->js(new moodle_url('/mod/valuemapdoc/amd/build/tabulator.min.js')); // NIEUŻYWANE
-$PAGE->requires->js(new moodle_url('/mod/valuemapdoc/scripts/tabulator.min.js'),true); // <-- TO JEST KLUCZOWE
-// $PAGE->requires->js_call_amd('mod_valuemapdoc/tabulatorlib', 'init'); // NIEUŻYWANE, tabulatormap inicjuje Tabulatora
 
-//obsługa markets readonly
-//$can_toggle_readonly = has_capability('mod/valuemapdoc:manage', $context) || has_capability('mod/valuemapdoc:manageentries', $context);
-$can_toggle_readonly = true; // tymczasowo włączone, aby umożliwić przełączanie trybu readonly
-// Klucz preferencji GLOBALNY dla użytkownika
-$readonly_preference_key = 'mod_valuemapdoc_readonly_mode';
+// Get user's field level and filter columns accordingly
+$user_fields = field_levels::get_user_fields();
+$user_level_config = field_levels::get_user_level_config();
 
-// Sprawdź czy jest parametr readonly w URL
-$readonly_param = optional_param('readonly', null, PARAM_INT);
-
-if ($readonly_param !== null && $can_toggle_readonly) {
-    // Zapisz nową GLOBALNĄ preferencję użytkownika
-    $new_readonly = (bool)$readonly_param;
-    set_user_preferences(array($readonly_preference_key => $new_readonly ? '1' : '0'));
-    $readonly_mode = $new_readonly;
-    
-    // Przekieruj aby usunąć parametr z URL
-    $redirect_url = new moodle_url('/mod/valuemapdoc/view.php', ['id' => $id],'markets-tab');
-    redirect($redirect_url);
-    
-} else {
-    // Odczytaj GLOBALNĄ preferencję użytkownika (domyślnie false = tryb edycji)
-    $readonly_preference = get_user_preferences($readonly_preference_key, '0');
-    $readonly_mode = (bool)$readonly_preference;
-}
-
-// Jeśli użytkownik nie ma uprawnień do edycji, wymuszaj readonly
-$readonly_forced = false;
-/*if (!has_capability('mod/valuemapdoc:manage', $context)) {
-    $readonly_mode = true;
-    $readonly_forced = true;
-    $can_toggle_readonly = false;
-}
-*/
-
-// Obsługa widoczności wg grupy
-
-$groupmode = groups_get_activity_groupmode($cm);
-$groupid = groups_get_activity_group($cm);
-$usergroups = groups_get_user_groups($cm->course, $USER->id);
-if ($groupmode == SEPARATEGROUPS && empty($usergroups[0]) && !has_capability('moodle/site:accessallgroups', $context)) {
-    echo $OUTPUT->notification(get_string('nogroupaccess', 'mod_valuemapdoc'), 'error');
-    echo $OUTPUT->footer();
-    exit;
-}
-
-$groupusers = [];
-
-if ($groupmode) {
-    if ($groupid) {
-        $groupusers = array_keys(groups_get_members($groupid, 'u.id'));
-    } else {
-        // Jeśli są grupy, ale nie wybrano żadnej – pokazujemy tylko własne wpisy
-        $groupusers = [$USER->id];
-    }
-} else {
-    // Brak trybu grupowego – pokazujemy wszystkie wpisy
-    $groupusers = $DB->get_fieldset_select('user', 'id', 'deleted = 0');
-}
-
-// Pobierz wpisy widoczne dla użytkownika/grupy
-list($insql, $params) = $DB->get_in_or_equal($groupusers, SQL_PARAMS_QM);
-
-$params[] = $course->id;
-$params['thismoduleid'] = $cm->instance;
-
-
-
-$columns = [
-    'market', 'industry', 'role', 'businessgoal', 'strategy', 'difficulty', 'situation',
-    'statusquo', 'coi', 'differentiator', 'impact', 'newstate', 'successmetric',
-    'impactstrategy', 'impactbusinessgoal', 'impactothers', 'proof', 'time2results',
-    'quote', 'clientname'
+// Define all possible columns
+$all_columns = [
+    'market', 'industry', 'role', 'businessgoal', 'strategy', 'difficulty',
+    'situation', 'statusquo', 'coi', 'differentiator', 'impact', 'newstate',
+    'successmetric', 'impactstrategy', 'impactbusinessgoal', 'impactothers',
+    'proof', 'time2results', 'quote', 'clientname'
 ];
 
+// Filter columns based on user's level
+$columns = array_intersect($all_columns, $user_fields);
 
-    // Pobierz instancje master dla tego kursu
-    $instances = $DB->get_records_sql("
-            SELECT cm.id as cmid, v.name
-            FROM {course_modules} cm
-            JOIN {modules} m ON cm.module = m.id
-            JOIN {valuemapdoc} v ON cm.instance = v.id
-            WHERE cm.course = :courseid AND v.ismaster = 1 AND m.name = 'valuemapdoc'
-        ", ['courseid' => $course->id]);
+// Handle readonly mode
+$readonly_forced = !has_capability('mod/valuemapdoc:manage', $context);
+$can_toggle_readonly = has_capability('mod/valuemapdoc:manage', $context);
 
-    $usergroupsall = groups_get_user_groups($course->id, $USER->id);
-    $userhasgroups = !empty($usergroupsall[0]);
-
-   // Obsługa wyboru instancji master
-    $options = [['id' => 0, 'name' => 'LOCAL']];
-    $rawpref = get_user_preferences("mod_valuemapdoc_masterfilters", '');
-    $parts = explode(':', $rawpref);
-    $selectedfilter = ($parts[0] == $cm->id) ? (int)($parts[1] ?? 0) : 0;
-
-    foreach ($instances as $instance) {
-      //  var_dump($instance);
-            $icm  = get_coursemodule_from_id('valuemapdoc', $instance->cmid, 0, false, MUST_EXIST);
-            $icontextmodule = \context_module::instance($icm->id);
-            $igroupmode = groups_get_activity_groupmode($icm);
-
-            if ($igroupmode == SEPARATEGROUPS && !$userhasgroups && !has_capability('moodle/site:accessallgroups', $contextmodule)) {
-                continue; // użytkownik nie należy do żadnej grupy, a aktywność wymaga przynależności
-            }
-            $options[]  = [
-                'id' => $instance->cmid, 
-                'name' =>  $instance->name,
-            ];
-        }
-
-    //Dodaj lokalną instancję jako opcję
-    foreach ($options as $key => $option) {
-        if ($option['id'] == $selectedfilter){
-            $options[$key]['is_selected'] = true; // oznacz lokalny jako wybrany
-        }
-    }
-
-    $hascourseanymaster = (count($options) >1 );//!empty($masterinstances);
-    if ($hascourseanymaster) {
-        $classmaster = "";
-    } else {
-        $classmaster = " d-none";
-    }
-
-// Zakładka: Content – dotychczasowa zawartość
-
-
-$context = \context_module::instance($id);
-//self::validate_context($context);
-$params = ['cmid' => $id];
-$sql = "
-    SELECT c.id, c.userid, c.visibility, u.firstname, u.lastname,
-           c.name, c.templateid, t.templatetype, t.name AS templatename,
-           c.customprompt, c.marketid, c.customerid, c.personid, c.opportunityid, 
-           c.timecreated, c.content
-    FROM {valuemapdoc_content} c
-    JOIN {user} u ON u.id = c.userid
-    LEFT JOIN {valuemapdoc_templates} t ON t.id = c.templateid
-    WHERE c.cmid = :cmid
-";
-
-if ($groupmode == SEPARATEGROUPS && !has_capability('moodle/site:accessallgroups', $context)) {
-    $usergroups = groups_get_user_groups($course->id, $USER->id);
-    if (empty($usergroups[0])) {
-        $records = [];
-    } else {
-        $sql .= " AND (c.userid = :userid OR (c.visibility = 0 AND c.groupid = :groupid))";
-        $params['userid'] = $USER->id;
-        $params['groupid'] = $groupid;
-        $records = $DB->get_records_sql($sql, $params);
-    }
+// If readonly parameter is set and user can toggle, use it
+if ($readonly !== -1 && $can_toggle_readonly) {
+    $readonly_mode = (bool)$readonly;
+    set_user_preference('mod_valuemapdoc_readonly_' . $cm->id, $readonly_mode);
 } else {
-    $sql .= " AND (c.visibility = 0 OR c.userid = :userid)";
-    $params['userid'] = $USER->id;
-    $records = $DB->get_records_sql($sql, $params);
+    // Otherwise use saved preference or default based on permissions
+    $readonly_mode = get_user_preference('mod_valuemapdoc_readonly_' . $cm->id, $readonly_forced);
 }
 
-$results = [];
-foreach ($records as $rec) {
-    $results[] = [
-        'id' => $rec->id,
-        'userid' => $rec->userid,
-        'name' => $rec->name ?? '',
-        'templateid' => $rec->templateid ?? 0,
-        'templatetype' => $rec->templatetype ?? '(brak)',
-        'templatename' => $rec->templatename ?? '(brak)',
-        'customprompt' => $rec->customprompt ?? '',
-        //c.marketid, c.customerid, c.personid, c.opportunityid
-        'market' => $rec->marketid ? markets::get_by_id($rec->marketid)->name : '(brak)',
-        'customer' => $rec->customerid ? markets::get_by_id($rec->customerid)->name : '(brak)',
-        'person' => $rec->personid  ? markets::get_by_id($rec->personid)->name : '(brak)',
-        'opportunity' => $rec->opportunityid ? markets::get_by_id($rec->opportunityid)->name : '(brak)',
-        'timecreated' => userdate($rec->timecreated),
-        'content' => shorten_text(strip_tags($rec->content), 200),
-        'visibility' => $rec->visibility ?? 0,
-    ];
+// Force readonly if user doesn't have manage capability
+if ($readonly_forced) {
+    $readonly_mode = true;
 }
 
+// Get groups data
+$groups = groups_get_all_groups($course->id);
+$haaccessallgroups = has_capability('moodle/site:accessallgroups', $context);
+$groupoptions = [];
 
-//$docs = $DB->get_records('valuemapdoc_content', ['cmid' => $id], 'userid', 'opportunityname, templateid, timecreated');
-$grouped = [];
-foreach ($results as $doc) {
-    $oopname = $doc['market'] . ' - ' . $doc['customer'] . ' - ' . $doc['person'] . ' - ' . $doc['opportunity'];
-    $grouped[$oopname][$doc['templatetype']][$doc['templatename']][] = $doc;
-//    $grouped[$doc['templatetype']][$doc['templatename']][] = $doc;
+if ($haaccessallgroups || !empty($groups)) {
+    $groupoptions[0] = get_string('allgroups', 'mod_valuemapdoc');
+    
+    if (!empty($groups)) {
+        foreach ($groups as $group) {
+            $groupoptions[$group->id] = $group->name;
+        }
+    }
 }
 
+// Master instances for filtering
+$sql = "SELECT cm.id as cmid, c.shortname, v.name
+        FROM {course_modules} cm
+        JOIN {valuemapdoc} v ON cm.instance = v.id
+        JOIN {course} c ON cm.course = c.id
+        WHERE cm.module = (SELECT id FROM {modules} WHERE name = 'valuemapdoc')
+          AND v.ismaster = 1
+          AND c.id = ?
+        ORDER BY c.shortname, v.name";
 
+$masterinstances = $DB->get_records_sql($sql, [$course->id]);
 
-// Zakładka: Template – dotychczasowa zawartość
+$options = ['' => get_string('nomasterfilter', 'mod_valuemapdoc')];
+foreach ($masterinstances as $instance) {
+    $options[$instance->cmid] = $instance->shortname . ': ' . $instance->name;
+}
 
-$templates = $DB->get_records('valuemapdoc_templates', null, 'templatetype, name, description, fields', '*');
+$classmaster = '';
+if (!empty($selectedfilter)) {
+    $classmaster = 'selected-master';
+}
+
+// Get markets data
+$marketsurl = new moodle_url('/mod/valuemapdoc/markets.php', ['id' => $id]);
+$markets = [];
+
+// Get content entries
+$entries = [];
+// ... (your existing entries loading code)
+
+// Templates
+$templates = $DB->get_records('valuemapdoc_templates', null, 'templatetype, name');
+$templateselect = [];
 $grouped_templates = [];
 
-
-foreach ($templates as $tpl) {
-    $ttype = $tpl->templatetype;
-    if (!isset($grouped_templates[$ttype])) {
-        $grouped_templates[$ttype] = [
-            'ttype' => $ttype,
-            'items' => []
-        ];
-    }
-    $grouped_templates[$ttype]['items'][] = [
-        'tname' => $tpl->name,
-        'description' => $tpl->description,
-        'fields' => $tpl->fields
-    ];
-}
-
-
-
-$templateselect = [];
-
 foreach ($templates as $template) {
-    $type = $template->templatetype;
-    if (!isset($templateselect[$type])) {
-        $templateselect[$type] = [
-            'type' => $type,
-            'items' => []
-        ];
-    }
-
-    $templateselect[$type]['items'][] = [
-        'id' => $template->id,
-        'name' => $template->name
-    ];
+    $templateselect[$template->id] = $template->templatetype . ': ' . $template->name;
+    $grouped_templates[$template->templatetype][] = $template;
 }
 
-//var_dump($groupmode);
-$groupoptions = [];
-if ($groupmode != NOGROUPS) {
-if (has_capability('moodle/site:accessallgroups', $context)) {
-    $groups = groups_get_all_groups($course->id);
-/*    $groupoptions[] = [
-        'id' => 0,
-        'name' => get_string('allgroups', 'group'),
-        'is_selected' => ($groupid == 0)
-    ]; */
-    foreach ($groups as $group) {
-        $groupoptions[] = [
-            'id' => $group->id,
-            'name' => $group->name,
-            'is_selected' => ($group->id == $groupid)
-        ];
-    }
-}
-
-$haaccessallgroups = has_capability('moodle/site:accessallgroups', $context);
-} else {
-    $haaccessallgroups = false;
-}
-
-
-//$marketsurl = new moodle_url('/mod/valuemapdoc/markets.php', ['id' => $id]);
-$marketsurl = (new moodle_url('/mod/valuemapdoc/markets.php', [
-        'id' => $id,
-        'action' => 'add',
-        'type' => 'market'
-]));
-// W view.php
-$markets = markets::get_by_type($cm->id, 'market');
-$markets_html = markets::render_hierarchy_mustache($markets, $cm->id, false); // readonly mode
-
-//echo ($markets_html);die();
-
-//$markets = markets::get_by_type($course->id, 'market');
-//$markets = markets::get_market_detail_template_data($market, $course->id, $cm->id);
-
-$m = array_map(function($market) use ($cm) {
-        return markets::get_market_compact_item_data($market, $cm->id, 0, false);
-    }, $markets);
-
-$m = markets::get_hierarchy_template_data($markets, $cm->id, $readonly_mode);
-//var_dump($m);die();
-
+// Prepare data for template
 $tablecontent = [
-    'coursefullname' => $course->fullname,
+    'contextid' => $context->id,
+    'cmid' => $cm->id,
     'courseid' => $course->id,
-    'valuemapdocname' => format_string($valuemapdoc->name),
-    'cmid' => $id,
-    'groupmode' => $groupmode,
-    'groupid' => $groupid,
-    'generate_url' => new moodle_url('/mod/valuemapdoc/generate.php', ['id' => $id]),
-    'edit_url' =>  new moodle_url('/mod/valuemapdoc/edit.php', ['id' => $id]), 
+    'name' => format_string($valuemapdoc->name),
+    'intro' => format_module_intro('valuemapdoc', $valuemapdoc, $cm->id),
+    'has_intro' => !empty($valuemapdoc->intro),
+    'can_add' => !$readonly_mode,
+    'can_edit' => !$readonly_mode,
+    'can_delete' => !$readonly_mode && has_capability('mod/valuemapdoc:manage', $context),
+    'can_generate' => true,
     'selectedfilter' => $selectedfilter,
-    'hasmanagecapability' => has_capability('mod/valuemapdoc:manageentries', $context),
-    'import_url' => new moodle_url('/mod/valuemapdoc/import.php', ['id' => $id]),
+    'filtercmid' => $selectedfilter,
+    'add_url' => new moodle_url('/mod/valuemapdoc/edit.php', ['id' => $id]),
     'export_url' => new moodle_url('/mod/valuemapdoc/export.php', ['id' => $id]),
     'classmaster' => $classmaster,
     'masteroptions' => $options,
-    'columns' => json_encode(array_map(fn($c) => [
-        'title' => get_string($c, 'valuemapdoc'),
-        'field' => $c,
-        'hozAlign' => 'left',
-        'headerSort' => true,
-        'width' => 150
-    ], $columns),JSON_HEX_APOS | JSON_HEX_QUOT),
+    
+    // Dynamic columns based on user's field level
+    'columns' => json_encode(array_map(function($c) {
+        return [
+            'title' => get_string($c, 'mod_valuemapdoc'),
+            'field' => $c,
+            'hozAlign' => 'left',
+            'headerSort' => true,
+            'width' => 150
+        ];
+    }, $columns), JSON_HEX_APOS | JSON_HEX_QUOT),
 
-    'tabulatordata' => [ // możesz tu przekazać dodatkowe dane potrzebne do js
+    'tabulatordata' => [
         'courseid' => $course->id,
         'cmid' => $cm->id,
         'filtercmid' => $selectedfilter
     ],
-    'documents' => $grouped, // przetworzone wpisy content
-    'tempselect' => array_values($templateselect), // przetworzone szablony
-
-    'templates' => array_values($grouped_templates),// przetworzone szablony
+    'documents' => [], // processed content entries
+    'tempselect' => array_values($templateselect),
+    'templates' => array_values($grouped_templates),
     'bulk_edit_url' => new moodle_url('/mod/valuemapdoc/edit_bulk.php', ['id' => $id]),
     'hasaccessallgroups' => $haaccessallgroups,
     'groupoptions' => $groupoptions,
     
     'has_markets' => !empty($markets),
     'readonly' => $readonly_mode,
-    'markets' => array_values($m),
-    'markets' => $m['markets'],  
-    'has_markets' => $m['has_markets'], 
-    'readonly' => $m['readonly'], 
-    'add_market_url' => $m['add_market_url'],
-    'marketsurl' => $marketsurl,
-
+    'markets' => array_values($markets),
     'readonly_toggle' => [
         'can_toggle' => $can_toggle_readonly,
         'current_readonly' => $readonly_mode,
-        'is_user_choice' => !$readonly_forced, // True jeśli użytkownik sam wybrał readonly
+        'is_user_choice' => !$readonly_forced,
         'toggle_url' => new moodle_url('/mod/valuemapdoc/view.php', [
             'id' => $cm->id,
             'readonly' => $readonly_mode ? 0 : 1
@@ -360,12 +177,22 @@ $tablecontent = [
         'show_toggle' => $can_toggle_readonly
     ],
     'readonly_info' => [
-        'is_forced' => $readonly_forced, // Wymuszony przez brak uprawnień
-        'is_user_choice' => !$readonly_forced && $readonly_mode, // Wybór użytkownika
-        'can_edit' => true , //has_capability('mod/valuemapdoc:manage', $context)
+        'is_forced' => $readonly_forced,
+        'is_user_choice' => !$readonly_forced && $readonly_mode,
+        'can_edit' => true,
     ],
+    
+    // Field level information
+    'field_level' => [
+        'current_level' => field_levels::get_user_level(),
+        'level_name' => $user_level_config['name'],
+        'fields_count' => $user_level_config['fields_count'],
+        'preferences_url' => new moodle_url('/mod/valuemapdoc/preferences.php', [
+            'cmid' => $cm->id,
+            'returnurl' => $PAGE->url->out(false)
+        ])
+    ]
 ];
-
 
 $renderer = $PAGE->get_renderer('mod_valuemapdoc');
 $PAGE->requires->js_call_amd('mod_valuemapdoc/tabulatormap', 'init', [
@@ -374,8 +201,9 @@ $PAGE->requires->js_call_amd('mod_valuemapdoc/tabulatormap', 'init', [
     'filtercmid' => $selectedfilter
 ]);
 
-//var_dump($tablecontent); die();
-
 echo $OUTPUT->header();
-echo $renderer->render_from_template('mod_valuemapdoc/view', $tablecontent );
+echo $renderer->render_from_template('mod_valuemapdoc/view', $tablecontent);
 echo $OUTPUT->footer();
+*/
+
+echo "VIEW.PHP";

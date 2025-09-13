@@ -1,10 +1,11 @@
-/* eslint no-trailing-spaces: "off", no-unused-vars: "off" *//* eslint jsdoc/require-jsdoc: "off" *//* global tinyMCE */
+/* eslint-env es6 */
+/* eslint no-trailing-spaces: "off", no-unused-vars: "off" */
 define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notification) {
 
     return {
         init: function() {
 
-            let isLoading = false; // Czy trwa zapytanie
+            var isLoading = false; // Czy trwa zapytanie
 
             function sendToGpt(promptText) {
                 if (isLoading) {
@@ -13,15 +14,14 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
 
                // console.log('🚀 Wywołano sendToGpt z promptem:', promptText);
 
-
-                const original = $('.original-content-store').html();
+                var original = $('.original-content-store').html();
 
                 if (!promptText || promptText.length < 5) {
                     Notification.alert('Prompt too short', 'Please provide a prompt with at least 5 characters.');
                     return;
                 }
 
-                const docid = $('input[name="docid"]').val();
+                var docid = $('input[name="docid"]').val();
 
                 isLoading = true;
                 $('.generated-content-preview').html(
@@ -57,16 +57,13 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
             $('#send_prompt_button').on('click', function(e) {
                 e.preventDefault();
                 sendToGpt($('#tuningprompt').val());
-
             });
 
             $('.prompt-preset').on('click', function(e) {
                 e.preventDefault();
-                const prompt = $(this).data('prompt');
+                var prompt = $(this).data('prompt');
                 sendToGpt(prompt);
             });
-
-            
         }
     };
 });

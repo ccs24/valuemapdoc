@@ -19,6 +19,7 @@
  * @copyright  2024
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+/* eslint-env es6 */
 
 define([], function() {
     return {
@@ -39,8 +40,8 @@ define([], function() {
                     link.classList.remove('active');
                 });
 
-                const activeTab = document.querySelector(hash);
-                const activeLink = document.querySelector('[data-href="' + hash + '"]');
+                var activeTab = document.querySelector(hash);
+                var activeLink = document.querySelector('[data-href="' + hash + '"]');
 
                 if (activeTab) {
                     activeTab.classList.add('active', 'show');
@@ -53,15 +54,16 @@ define([], function() {
             document.querySelectorAll('#valuemapdoc-tabs .nav-link').forEach(function(link) {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const targetHash = this.getAttribute('data-href');
+                    var targetHash = this.getAttribute('data-href');
                     if (targetHash) {
                         if (targetHash === '#content-tab') {
-                            import('mod_valuemapdoc/tablecontent').then((module) => {
+                            // Use require instead of dynamic import
+                            require(['mod_valuemapdoc/tablecontent'], function(module) {
                                 module.init();
 
-                                const spinner = document.querySelector('#spinner-indicator');
-                                const isPending = sessionStorage.getItem('valuemapdoc_pending_generation') === '1';
-                                const startTime = Date.now();
+                                var spinner = document.querySelector('#spinner-indicator');
+                                var isPending = sessionStorage.getItem('valuemapdoc_pending_generation') === '1';
+                                var startTime = Date.now();
 
                                 if (spinner && isPending) {
                                     spinner.classList.remove('d-none');
@@ -73,11 +75,13 @@ define([], function() {
                                  */
                                 function checkDocumentsReady() {
                                     require(['core/ajax'], function(Ajax) {
-                                        const container = document.querySelector('#valuemapdoc-content-table');
-                                        if (!container) { return; }
+                                        var container = document.querySelector('#valuemapdoc-content-table');
+                                        if (!container) { 
+                                            return; 
+                                        }
 
-                                        const courseid = container.dataset.courseid;
-                                        const cmid = container.dataset.cmid;
+                                        var courseid = container.dataset.courseid;
+                                        var cmid = container.dataset.cmid;
 
                                         Ajax.call([{
                                             methodname: 'mod_valuemapdoc_get_content_entries',
@@ -87,11 +91,15 @@ define([], function() {
                                                 include_master: 0
                                             }
                                         }])[0].then(function(entries) {
-                                            const ready = entries.length && entries.some(e => e.status === 'ready');
-                                            const expired = (Date.now() - startTime > 20000); // 20s timeout
+                                            var ready = entries.length && entries.some(function(e) {
+                                                return e.status === 'ready';
+                                            });
+                                            var expired = (Date.now() - startTime > 20000); // 20s timeout
 
                                             if (ready || expired) {
-                                                spinner?.classList.add('d-none');
+                                                if (spinner) {
+                                                    spinner.classList.add('d-none');
+                                                }
                                                 sessionStorage.removeItem('valuemapdoc_pending_generation');
                                             } else {
                                                 setTimeout(checkDocumentsReady, 5000);
@@ -117,9 +125,9 @@ define([], function() {
             if (window.location.hash) {
                 showTab(window.location.hash);
             } else {
-                const firstTabLink = document.querySelector('#valuemapdoc-tabs .nav-link[data-href]');
+                var firstTabLink = document.querySelector('#valuemapdoc-tabs .nav-link[data-href]');
                 if (firstTabLink) {
-                    const firstHash = firstTabLink.getAttribute('data-href');
+                    var firstHash = firstTabLink.getAttribute('data-href');
                     if (firstHash) {
                         history.replaceState(null, null, firstHash);
                         showTab(firstHash);

@@ -1,3 +1,4 @@
+/* eslint-env es6 */
 define(['jquery', 'core/ajax'], function() {
     return {
         init: function() {

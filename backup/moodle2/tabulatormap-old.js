@@ -3,6 +3,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 /* eslint-disable jsdoc/require-param */
+/* eslint-env es6 */
 define('mod_valuemapdoc/tabulatormap', [
     'mod_valuemapdoc/tabulatorlib', 
     'core/ajax', 
