@@ -1,0 +1,233 @@
+{{!
+    Template: mod_valuemapdoc/markets_hierarchy_compact
+    Context: Kompaktowy widok hierarchii rynków
+}}
+
+<div class="markets-compact-container">
+    <div class="markets-header">
+        <h3>{{title}}</h3>
+        {{#add_market_url}}
+        <a href="{{{add_market_url}}}" class="btn btn-sm btn-primary">
+            <i class="fa fa-plus"></i> Add Market
+        </a>
+        {{/add_market_url}}
+    </div>
+
+    {{#has_markets}}
+    <div class="markets-tree-view">
+        {{#markets}}
+        {{> mod_valuemapdoc/market_tree_item }}
+        {{/markets}}
+    </div>
+    {{/has_markets}}
+
+    {{^has_markets}}
+    <div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
+        <h4>No markets yet</h4>
+        <p>Start by creating your first market to organize customers and opportunities.</p>
+        {{#add_market_url}}
+        <a href="{{{add_market_url}}}" class="btn btn-primary">
+            <i class="fa fa-plus"></i> Create First Market
+        </a>
+        {{/add_market_url}}
+    </div>
+    {{/has_markets}}
+</div>
+
+<style>
+.markets-compact-container {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.markets-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.markets-header h3 {
+    margin: 0;
+    color: #495057;
+}
+
+.markets-tree-view {
+    /*padding: 12px;*/
+}
+
+.market-tree-item {
+    margin: 2px 0;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.market-tree-item:hover {
+    background: #f8f9fa;
+}
+
+.market-tree-item.type-market {
+    border-left-color: #007bff;
+}
+
+.market-tree-item.type-customer {
+    border-left-color: #28a745;
+}
+
+.market-tree-item.type-person {
+    border-left-color: #17a2b8;
+}
+
+.market-tree-item.type-opportunity {
+    border-left-color: #ffc107;
+}
+
+.market-item-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.market-item-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.market-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.market-name {
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.market-type-badge {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.market-type-badge.type-market { background: rgba(0, 123, 255, 0.1); color: #007bff; }
+.market-type-badge.type-customer { background: rgba(40, 167, 69, 0.1); color: #28a745; }
+.market-type-badge.type-person { background: rgba(23, 162, 184, 0.1); color: #17a2b8; }
+.market-type-badge.type-opportunity { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+
+.market-meta {
+    font-size: 11px;
+    color: #6c757d;
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+.market-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.btn-micro {
+    padding: 3px 6px;
+    font-size: 10px;
+    border: none;
+    border-radius: 3px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-micro.btn-edit {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.btn-micro.btn-edit:hover {
+    background: #bbdefb;
+}
+
+.btn-micro.btn-add {
+    background: #e8f5e8;
+    color: #388e3c;
+}
+
+.btn-micro.btn-add:hover {
+    background: #c8e6c9;
+}
+
+.btn-micro.btn-view {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.btn-micro.btn-view:hover {
+    background: #e1bee7;
+}
+
+.market-indent {
+    width: 24px;
+    flex-shrink: 0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.empty-state h4 {
+    margin-bottom: 8px;
+    color: #495057;
+}
+
+.empty-state p {
+    margin-bottom: 20px;
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+    .market-item-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .market-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .market-meta {
+        margin-left: 0;
+    }
+}
+</style>

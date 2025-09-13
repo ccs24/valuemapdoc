@@ -1,0 +1,13 @@
+2025-05-05T19:51:24+02:00 [DEBUG] : stdClass Object
+(
+    [id] => 3
+    [name] => Autenti + Webcon
+    [intro] => 
+    [introformat] => 1
+    [targetactivity] => 0
+    [ismaster] => 0
+    [activity_prompt] => 
+    [timecreated] => 1745838319
+    [timemodified] => 1745838319
+)
+

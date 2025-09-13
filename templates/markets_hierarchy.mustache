@@ -1,0 +1,232 @@
+{{!
+    Enhanced markets hierarchy template with readonly toggle
+}}
+<div class="markets-hierarchy">
+    <div class="markets-header d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="mb-1 d-flex align-items-center">
+                <!--i class="fa fa-sitemap me-2"></i-->{{title}}
+                
+  
+                
+                {{#readonly_info}}
+                    {{#is_forced}}
+                        <span class="badge bg-secondary ms-1" title="Brak uprawnień do edycji">
+                            <i class="fa fa-lock"></i>
+                        </span>
+                    {{/is_forced}}
+                {{/readonly_info}}
+            </h3>
+            
+            {{#markets_count}}
+                <small class="text-muted">
+                    <i class="fa fa-info-circle"></i> 
+                    Łącznie elementów: <strong>{{markets_count}}</strong>
+                    {{#hierarchy_stats}}
+                        | Maks. głębokość: <strong>{{max_depth}}</strong>
+                        {{#total_opportunities}}
+                            | Okazje: <strong>{{total_opportunities}}</strong>
+                        {{/total_opportunities}}
+                    {{/hierarchy_stats}}
+                </small>
+            {{/markets_count}}
+        </div>
+        
+        <div class="markets-toolbar">
+            {{! Readonly Toggle Button }}
+            {{#readonly_toggle}}
+                {{#can_toggle}}
+                <div class="btn-group btn-group-sm me-2" role="group">
+                    {{#current_readonly}}
+                        <a href="{{{toggle_url}}}" 
+                           class="btn btn-success readonly-toggle-btn" 
+                           title="Przełącz na tryb edycji - pozwoli na dodawanie, edycję i usuwanie elementów">
+                            <i class="fa fa-edit"></i> 
+                            <span class="d-none d-md-inline">Włącz edycję</span>
+                        </a>
+                    {{/current_readonly}}
+                    {{^current_readonly}}
+                        <a href="{{{toggle_url}}}" 
+                           class="btn btn-info readonly-toggle-btn" 
+                           title="Przełącz na tryb podglądu - ukryje wszystkie opcje edycji">
+                            <i class="fa fa-eye"></i> 
+                            <span class="d-none d-md-inline">Tylko podgląd</span>
+                        </a>
+                    {{/current_readonly}}
+                </div>
+                {{/can_toggle}}
+            {{/readonly_toggle}}
+            
+            {{! Management buttons - only in edit mode }}
+            {{^readonly}}
+            
+            <a href="{{{add_market_url}}}" class="btn btn-primary btn-sm">
+                <i class="fa fa-plus"></i> 
+                <span class="d-none d-md-inline">Dodaj rynek</span>
+            </a>
+            {{/readonly}}
+        </div>
+    </div>
+
+    {{! Readonly mode info alert }}
+    <!--
+    {{#readonly}}
+        <div class="alert {{#readonly_info}}{{#is_forced}}alert-warning{{/is_forced}}{{#is_user_choice}}alert-info{{/is_user_choice}}{{/readonly_info}} d-flex align-items-center mb-3">
+            <div class="flex-grow-1">
+                {{#readonly_info}}
+                    {{#is_forced}}
+                        <i class="fa fa-lock me-2"></i>
+                        <strong>Tylko podgląd:</strong> 
+                        Nie masz uprawnień do edycji elementów w tym module.
+                    {{/is_forced}}
+                    {{#is_user_choice}}
+                        <i class="fa fa-eye me-2"></i>
+                        <strong>Tryb podglądu:</strong> 
+                        Wybrałeś tryb tylko do odczytu. Wszystkie funkcje edycji są ukryte.
+                    {{/is_user_choice}}
+                {{/readonly_info}}
+            </div>
+            {{#readonly_toggle}}
+                {{#can_toggle}}
+                <div>
+                    <a href="{{toggle_url}}" class="btn btn-success btn-sm">
+                        <i class="fa fa-edit"></i> Włącz edycję
+                    </a>
+                </div>
+                {{/can_toggle}}
+            {{/readonly_toggle}}
+        </div>
+    {{/readonly}}
+    -->
+
+    <div class="markets-container">
+        {{#has_markets}}
+            <div class="markets-tree" id="markets-tree">
+                {{#markets}}
+                    {{> mod_valuemapdoc/market_item }}
+                {{/markets}}
+            </div>
+        {{/has_markets}}
+        
+        {{^has_markets}}
+            <div class="alert alert-info text-center py-4">
+                <i class="fa fa-info-circle fa-3x mb-3 text-muted"></i>
+                <h5>Brak rynków</h5>
+                <p class="text-muted">Nie znaleziono żadnych rynków w systemie.</p>
+                {{^readonly}}
+                    <a href="{{add_market_url}}" class="btn btn-primary">
+                        <i class="fa fa-plus"></i> Dodaj pierwszy rynek
+                    </a>
+                {{/readonly}}
+                {{#readonly}}
+                    {{#readonly_toggle}}
+                        {{#can_toggle}}
+                            <a href="{{toggle_url}}" class="btn btn-success">
+                                <i class="fa fa-edit"></i> Włącz edycję aby dodać rynki
+                            </a>
+                        {{/can_toggle}}
+                    {{/readonly_toggle}}
+                {{/readonly}}
+            </div>
+        {{/has_markets}}
+    </div>
+</div>
+
+{{! JavaScript for enhanced UX }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth transition for readonly toggle
+    const toggleButtons = document.querySelectorAll('.readonly-toggle-btn');
+    toggleButtons.forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            // Show loading state
+            const originalContent = this.innerHTML;
+            this.innerHTML = '<i class="fa fa-spinner fa-spin"></i> <span class="d-none d-md-inline">Przełączanie...</span>';
+            this.classList.add('disabled');
+            
+            // Let the normal link behavior continue
+            // The page will reload with new readonly state
+        });
+    });
+    
+    // Expand/Collapse functionality (only in edit mode)
+    {{#readonlyNO}}
+    document.getElementById('expand-all-markets')?.addEventListener('click', function() {
+        const collapses = document.querySelectorAll('.market-children.collapse:not(.show)');
+        collapses.forEach(collapse => {
+            const toggle = document.querySelector(`[data-bs-target="#${collapse.id}"]`);
+            if (toggle && !collapse.classList.contains('show')) {
+                toggle.click();
+            }
+        });
+    });
+    
+    document.getElementById('collapse-all-markets')?.addEventListener('click', function() {
+        const collapses = document.querySelectorAll('.market-children.collapse.show');
+        collapses.forEach(collapse => {
+            const toggle = document.querySelector(`[data-bs-target="#${collapse.id}"]`);
+            if (toggle && collapse.classList.contains('show')) {
+                toggle.click();
+            }
+        });
+    });
+    {{/readonlyNO}}
+    
+    // Initialize tooltips
+    /*
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });*/
+});
+</script>
+
+<style>
+.markets-hierarchy .badge {
+    font-size: 0.75em;
+    vertical-align: middle;
+}
+
+.markets-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.readonly-toggle-btn {
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.readonly-toggle-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.mode-badge {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 768px) {
+    .markets-toolbar {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .markets-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .mode-badge {
+        font-size: 0.7em;
+    }
+}
+</style>

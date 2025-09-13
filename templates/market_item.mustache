@@ -1,0 +1,28 @@
+{{!
+    Single market item with recursive children
+}}
+<div class="market-item {{type}}-item" 
+     style="margin-left: {{indent}}px; padding: 12px; border-left: 3px solid {{color}}; background-color: #f8f9fa;">
+    
+    {{> mod_valuemapdoc/market_header }}
+    
+    {{#has_description}}
+        <div class="market-description mt-2">
+            <div class="text-muted" style="font-size: 0.9em;">
+            {{{description}}}
+            </div>
+        </div>
+    {{/has_description}}
+    
+    {{!#has_additional_fields}}
+        {{!> mod_valuemapdoc/market_additional_fields }}
+    {{!/has_additional_fields}}
+    
+    {{#has_children}}
+        <div class="market-children mt-3">
+            {{#children}}
+                {{> mod_valuemapdoc/market_item }}
+            {{/children}}
+        </div>
+    {{/has_children}}
+</div>

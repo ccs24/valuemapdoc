@@ -1,0 +1,120 @@
+{{=<% %>=}}
+<ion-content>
+    <div class="valuemap-mobile">
+        <%#intro%>
+        <div class="valuemap-intro">
+            <%{intro}%>
+        </div>
+        <%/intro%>
+
+        <%#has_entries%>
+        <div class="valuemap-entries">
+            <h3>Value Map Entries</h3>
+            
+            <%#valuemap_entries%>
+            <ion-card class="valuemap-entry-card">
+                <ion-card-header>
+                    <ion-card-title>
+                        <%#market%><%market%><%/market%><%#industry%> - <%industry%><%/industry%>
+                    </ion-card-title>
+                    <%#role%>
+                    <ion-card-subtitle><%role%></ion-card-subtitle>
+                    <%/role%>
+                </ion-card-header>
+                
+                <ion-card-content>
+                    <%#businessgoal%>
+                    <div class="entry-field">
+                        <strong>Business Goal:</strong>
+                        <p><%businessgoal%></p>
+                    </div>
+                    <%/businessgoal%>
+                    
+                    <%#difficulty%>
+                    <div class="entry-field">
+                        <strong>Difficulty:</strong>
+                        <p><%difficulty%></p>
+                    </div>
+                    <%/difficulty%>
+                    
+                    <%#differentiator%>
+                    <div class="entry-field">
+                        <strong>Differentiator:</strong>
+                        <p><%differentiator%></p>
+                    </div>
+                    <%/differentiator%>
+                    
+                    <div class="entry-meta">
+                        <%#maturity%>
+                        <ion-badge color="primary">
+                            Maturity: <%maturity%>
+                        </ion-badge>
+                        <%/maturity%>
+                        
+                        <%#ismaster%>
+                        <ion-badge color="success">
+                            Master
+                        </ion-badge>
+                        <%/ismaster%>
+                        
+                        <small>Modified: <%timemodified_formatted%></small>
+                    </div>
+                </ion-card-content>
+            </ion-card>
+            <%/valuemap_entries%>
+        </div>
+        <%/has_entries%>
+
+        <%^has_entries%>
+        <div class="no-entries">
+            <ion-icon name="map-outline" size="large"></ion-icon>
+            <h3>No entries yet</h3>
+            <p>Start by adding your first value map entry.</p>
+        </div>
+        <%/has_entries%>
+    </div>
+</ion-content>
+
+<style>
+.valuemap-mobile {
+    padding: 16px;
+}
+
+.valuemap-intro {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--ion-color-light);
+    border-radius: 8px;
+}
+
+.valuemap-entry-card {
+    margin-bottom: 16px;
+}
+
+.entry-field {
+    margin-bottom: 12px;
+}
+
+.entry-field strong {
+    color: var(--ion-color-primary);
+    font-size: 0.9em;
+}
+
+.entry-field p {
+    margin: 4px 0 0 0;
+}
+
+.entry-meta {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.no-entries {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ion-color-medium);
+}
+</style>

@@ -1,0 +1,424 @@
+<div class="mt-3" id="valuemapdoc-tabs" role="tabpanel" aria-labelledby="valuemapdoc-tabs-btn">
+  <ul class="nav nav-tabs" id="valuemapdocTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <a class="nav-link active" id="valuemap-tab-btn" data-toggle="tab" data-href="#valuemap-tab" href="#valuemap-tab" role="tab">ValueMap</a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" id="markets-tab-btn" data-toggle="tab" data-href="#markets-tab" href="#markets-tab" role="tab">
+        Markets
+      </a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" id="content-tab-btn" data-toggle="tab" data-href="#content-tab" href="#content-tab" role="tab">
+        Content
+      </a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" id="templates-tab-btn" data-toggle="tab" data-href="#templates-tab" href="#templates-tab" role="tab">Templates</a>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="valuemapdocTabsContent">
+    <div class="tab-pane fade show active" id="valuemap-tab" role="tabpanel" aria-labelledby="valuemap-tab-btn">
+      <div class='d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 mt-3 btn-toolbar' role = 'toolbar' aria-label = 'ValueMap toolbar'>
+          {{#hasaccessallgroups}}
+          <div class="btn-group" role="group">
+          <select class="form-select" id="groupfilter" name="groupfilter" title="Filtruj po grupie">
+            <option value="0">(Wszystkie grupy)</option>
+            {{#groupoptions}}
+              <option value="{{id}}" {{#is_selected}}selected{{/is_selected}}>{{name}}</option>
+            {{/groupoptions}}
+        </select>
+        </div>
+        {{/hasaccessallgroups}}
+        {{#hasmanagecapability}}
+
+        <!--// Środkowa część – eksporty -->
+        <div class = 'btn-group' role = 'group'>
+            <a href = {{#import_url}}{{import_url}}{{/import_url}} 
+                class = 'btn btn-outline-secondary' 
+                title = '📤 Import CSV'>
+                <i class="fa fa-cog" aria-hidden="true"></i> 📤 Import CSV
+            </a>
+            <a href = {{#export_url}}{{export_url}}{{/export_url}} 
+                class = 'btn btn-outline-secondary' 
+                title = '📤 Export CSV'>
+                <i class="fa fa-download" aria-hidden="true"></i> 
+                📤 Export CSV
+            </a>
+        </div>
+        {{/hasmanagecapability}}
+
+    </div>
+    <div class='d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 mt-3 btn-toolbar' role = 'toolbar' aria-label = 'ValueMap toolbar'>
+
+        <!--Lewa część – linki główne -->
+        <!--Lewa część – linki główne -->
+
+    <!-- Hierarchy Selector Section -->
+    <div class="btn-group hierarchy-selector-inline" role="group" aria-label="Hierarchy Selection">
+        <!-- Market Selector -->
+        <div class="input-group input-group-sm">
+            <span class="input-group-text bg-primary text-white" title="Market">🔍</span>
+            <select id="hierarchy_market" 
+                    name="hierarchy_market" 
+                    class="form-select form-select-sm"
+                    data-hierarchy-level="market"
+                    data-cmid="{{cmid}}"
+                    style="min-width: 140px;">
+                <option value="0">-- Market --</option>
+            </select>
+        </div>
+
+        <!-- Customer Selector -->
+        <div class="input-group input-group-sm" style="display: none;">
+            <span class="input-group-text bg-success text-white" title="Customer">🏛</span>
+            <select id="hierarchy_customer" 
+                    name="hierarchy_customer" 
+                    class="form-select form-select-sm"
+                    data-hierarchy-level="customer"
+                    data-parent-level="market"
+                    style="min-width: 140px;">
+                <option value="0">-- Customer --</option>
+            </select>
+        </div>
+
+        <!-- Person Selector -->
+        <div class="input-group input-group-sm" style="display: none;">
+            <span class="input-group-text bg-info text-white" title="Person">👤</span>
+            <select id="hierarchy_person" 
+                    name="hierarchy_person" 
+                    class="form-select form-select-sm"
+                    data-hierarchy-level="person"
+                    data-parent-level="customer"
+                    style="min-width: 120px;">
+                <option value="0">-- Person --</option>
+            </select>
+        </div>
+
+        <!-- Opportunity Selector -->
+        <div class="input-group input-group-sm" style="display: none;">
+            <span class="input-group-text bg-warning text-dark" title="Opportunity">💰</span>
+            <select id="hierarchy_opportunity" 
+                    name="hierarchy_opportunity" 
+                    class="form-select form-select-sm"
+                    data-hierarchy-level="opportunity"
+                    data-parent-level="customer"
+                    style="min-width: 140px;">
+                <option value="0">-- Opportunity --</option>
+            </select>
+        </div>
+
+        <!-- Filename Prefix Input -->
+        <div class="input-group input-group">
+            <span class="input-group-text bg-dark text-white d-none" title="Filename Prefix">📝</span>
+            <input type="text"
+                   id="filenameprefix"
+                   name="filenameprefix"
+                   class="form-controlz form-controlx-sm"
+                   placeholder="Tytuł dokumentu"
+                   style="min-width: 140px;">
+        </div>
+
+        <!-- Reset Button -->
+        <button type="button" 
+                class="btn btn-outline-secondary btn-sm" 
+                id="hierarchy-reset-button"
+                title="Clear hierarchy selection"
+                style="display:none;">
+            ✕
+        </button>
+    </div>
+
+        <!-- Prawa część – wyszukiwarka -->
+        <div class = 'btn-group' role = 'group'>
+          <button class="btn btn-outline-success" 
+                    id="toggle-fullscreen" 
+                    title="🔳 Pełny ekran">
+                     🔳 Pełny ekran
+            
+          </button>
+        </div>
+    </div>
+    <div class='d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 mt-3 btn-toolbar' role = 'toolbar' aria-label = 'ValueMap toolbar'>
+        <div class = 'btn-group' role = 'group'>
+        <select name="templateid" id="templateid">
+          {{#tempselect}}
+            <optgroup label="{{type}}">
+              {{#items}}
+                <option value="{{id}}">{{name}}</option>
+              {{/items}}
+            </optgroup>
+          {{/tempselect}}
+        </select>
+
+
+            <button class="btn btn-primary btn-warning disabled" 
+                    id="generate-button" 
+                    disabled
+                    title="Generate document"
+                    data-action="{{#generate_url}}{{generate_url}}{{/generate_url}} " id = "{{id}}">
+                    <i class="fa fa-file-text-o" aria-hidden="true"></i> {{#str}}generatedocument, mod_valuemapdoc{{/str}}
+            </button>
+            <button class="btn btn-outline-secondary disabled"
+                    id="delete-bulk-button"
+                    disabled
+                    title="Delete selected rows">
+                    <i class="fa fa-trash" aria-hidden="true"></i>  
+            </button>
+            <button class="btn btn-outline-secondary disabled"
+                    id="edit-bulk-button"
+                    disabled
+                    title="Multiedit selected rows">
+                    <i class="fa-solid fa-check-double" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-outline-secondary disabled"
+                    id="duplicate-bulk-button"
+                    disabled
+                    title="Duplicate selected rows">
+                    <i class="fa fa-clone" aria-hidden="true"></i>  
+            </button>
+            <button class="btn btn-outline-secondary"
+                    id="empty-bulk-button"
+                    title="Add new empty row">
+                    
+                    <i class="fa-duotone fa-solid fa-arrows-down-to-line" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <div  class = 'btn-group' role = 'group'>
+            <a  href = {{#edit_url}}{{edit_url}}{{/edit_url}} 
+                class = 'btn btn-info' 
+                title = '{{#str}}edit, mod_valuemapdoc{{/str}}'>
+                <i class="fa fa-plus-square-o" aria-hidden="true"></i> 
+                {{#str}}addentry, mod_valuemapdoc{{/str}}
+            </a>
+            <!--input type = 'hidden' name = 'id' value = {{cmid}} /-->  
+            <select class="form-select {{#classmaster}}{{classmaster}}{{/classmaster}}" id="masterfilter" name="masterfilter">
+                {{#masteroptions}}
+                    <option value="{{id}}" 
+                        {{#is_selected}}selected{{/is_selected}} >
+                        {{name}}
+                    </option>
+                {{/masteroptions}}
+            </select>
+            <button class="btn btn-outline-secondary disabled"
+                    id="move-bulk-button"
+                    disabled
+                    title="Transfer to Master ValueMap">
+                    <i class="fa-solid fa-arrow-up-from-bracket" aria-hidden="true"></i>
+            </button>
+
+        </div>
+
+
+        <div  class = 'btn-group' role = 'group'>
+            <div class= 'd-flex' role = 'search'>
+              <input type="search" 
+                   class="form-control me-2" 
+                   id="valuemap-search" 
+                   name="q" 
+                   placeholder="{{#str}}search{{/str}}" 
+                   aria-label="{{#str}}search{{/str}}">
+            </div>
+                        
+
+            <button class="btn btn-outline-success" 
+                    id="search-button" 
+                    title="{{#str}}search{{/str}}">
+                <i class="fa fa-search" aria-hidden="true"></i>
+            </button>
+
+        </div>
+    </div>
+
+<div class = 'table-responsive' id = 'valuemap-tabulator-wrapper'>
+    <div id="valuemap-table-js" class="tabulator" style="width: 100%;"
+        data-columns = '{{{columns}}}'
+        data-courseid = "{{courseid}}"
+        data-cmid = "{{cmid}}"
+        data-filtercmid = "{{selectedfilter}}"    
+    >
+        </div>
+    </div>
+    </div> <!-- End of ValueMap tab -->
+
+    <div class="tab-pane fade" id="markets-tab" role="tabpanel" aria-labelledby="markets-tab-btn">
+        <!-- Markets Tab -->
+        <h4>Rynki</h4>
+        {{#has_markets}} 
+            {{!> mod_valuemapdoc/markets_hierarchy_compact }}
+            {{> mod_valuemapdoc/markets_hierarchy}}
+        {{/has_markets}}
+        {{^has_markets}}
+        <div class="alert alert-info">
+            <i class="fa fa-info-circle"></i>
+            {{#readonly}}
+            <p>Brak rynków.</p>
+            {{/readonly}}
+            {{^readonly}}
+                No markets found. <a href="{{{marketsurl}}}">Add your first market</a> to get started.
+            {{/readonly}}
+            </div>
+        {{/has_markets}}
+
+    </div>
+
+
+    <div class="tab-pane fade" id="content-tab" role="tabpanel" aria-labelledby="content-tab-btn">
+      <h4>Dokumenty</h4>
+      <button id="refresh-documents-btn" 
+              class="btn btn-outline-primary btn-sm"  
+              type="button" 
+              title="{{#str}}refresh, core{{/str}}"
+              >
+              <i class="fa fa-refresh"></i>
+              <span class="btn-text d-none d-sm-inline ml-1"> {{#str}}refresh, core{{/str}} </span>
+              </button>
+      <div id="valuemapdoc-content-table"
+           class="valuemapdoc-content-table d-none"
+           data-courseid="{{courseid}}"
+           data-cmid="{{cmid}}">
+      </div>
+      <div class="initial-documents">
+          {{#documents}}
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">{{#str}}opportunity, mod_valuemapdoc{{/str}}</th>
+            <th scope="col">{{#str}}template, mod_valuemapdoc{{/str}}</th>
+            <th scope="col">{{#str}}status{{/str}}</th>
+            <th scope="col">{{#str}}result, mod_valuemapdoc{{/str}}</th>
+            <th scope="col" class="text-center">{{#str}}actions, mod_valuemapdoc{{/str}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#.}}
+            <tr class="document-row" data-docid="{{id}}">
+              <td>
+                <div class="d-flex align-items-center">
+                  <i class="fa fa-file-text-o text-primary mr-2"></i>
+                  <div>
+                    <strong>{{opportunityname}}</strong>
+                    {{#description}}
+                      <br><small class="text-muted">{{description}}</small>
+                    {{/description}}
+                  </div>
+                </div>
+              </td>
+              <td>
+                {{#templatename}}
+                  <span class="badge badge-secondary">{{templatename}}</span>
+                {{/templatename}}
+                {{^templatename}}
+                  <span class="text-muted">{{#str}}notemplates, mod_valuemapdoc{{/str}}</span>
+                {{/templatename}}
+              </td>
+              <td>
+                <small>{{created}}</small>
+                {{#modified}}
+                  <br><small class="text-muted">{{#str}}modified{{/str}}: {{modified}}</small>
+                {{/modified}}
+              </td>
+              <td>
+                {{#visibility}}
+                  {{#visibility_private}}
+                    <span class="badge badge-warning">
+                      <i class="fa fa-lock"></i> {{#str}}private{{/str}}
+                    </span>
+                  {{/visibility_private}}
+                  {{^visibility_private}}
+                    <span class="badge badge-success">
+                      <i class="fa fa-globe"></i> {{#str}}shared{{/str}}
+                    </span>
+                  {{/visibility_private}}
+                {{/visibility}}
+              </td>
+              <td>
+                {{#has_rating}}
+                  {{#effectiveness}}
+                    {{#effectiveness_good}}
+                      <span class="text-success">
+                        <i class="fa fa-thumbs-up"></i> {{#str}}good{{/str}}
+                      </span>
+                    {{/effectiveness_good}}
+                    {{#effectiveness_neutral}}
+                      <span class="text-warning">
+                        <i class="fa fa-meh-o"></i> {{#str}}neutral{{/str}}
+                      </span>
+                    {{/effectiveness_neutral}}
+                    {{#effectiveness_bad}}
+                      <span class="text-danger">
+                        <i class="fa fa-thumbs-down"></i> {{#str}}bad{{/str}}
+                      </span>
+                    {{/effectiveness_bad}}
+                  {{/effectiveness}}
+                {{/has_rating}}
+                {{^has_rating}}
+                  <span class="text-muted"></span>
+                {{/has_rating}}
+              </td>
+              <td class="text-center">
+                <div class="btn-group btn-group-sm" role="group">
+                  <!-- Przycisk podglądu/oceny -->
+                  <a href="{{rate_url}}" 
+                     class="btn btn-outline-primary btn-sm" 
+                     title="{{#str}}documentpreview, mod_valuemapdoc{{/str}}">
+                    <i class="fa fa-eye"></i>
+                  </a>
+                  
+                  <!-- Przycisk edycji -->
+                  {{#can_edit}}
+                    <a href="{{edit_url}}" 
+                       class="btn btn-outline-secondary btn-sm" 
+                       title="{{#str}}edit{{/str}}">
+                      <i class="fa fa-edit"></i>
+                    </a>
+                  {{/can_edit}}
+                  
+                  <!-- Przycisk dostrajania -->
+                  {{#can_tune}}
+                    <a href="{{tune_url}}" 
+                       class="btn btn-outline-info btn-sm" 
+                       title="{{#str}}tune, mod_valuemapdoc{{/str}}">
+                      <i class="fa fa-cog"></i>
+                    </a>
+                  {{/can_tune}}
+                </div>
+              </td>
+            </tr>
+          {{/.}}
+        </tbody>
+      </table>
+    </div>
+  {{/documents}}
+        {{^documents}}
+          <p>Brak dokumentów.</p>
+        {{/documents}}
+      </div>
+    </div>
+
+
+    <div class="tab-pane fade" id="templates-tab" role="tabpanel" aria-labelledby="templates-tab-btn">
+      <h4>Szablony</h4>
+      {{#templates}}
+    <h5 class="mt-4">{{ttype}}</h5>
+    {{#items}}
+      <div class="card mb-2">
+        <div class="card-body">
+          <h6 class="card-title">{{tname}}</h6>
+          <p class="card-text"><strong>Opis:</strong> {{description}}</p>
+          <p class="card-text"><strong>Pola:</strong> {{fields}}</p>
+        </div>
+      </div>
+    {{/items}}
+  {{/templates}}
+
+      {{^templates}}
+        <p>Brak szablonów.</p>
+      {{/templates}}
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,100 @@
+{{!
+    ULTRA DEBUG - pokaż wszystkie dostępne pola
+}}
+<div class="markets-hierarchy">
+    <h3>{{title}} - ULTRA DEBUG</h3>
+    
+    <div class="alert alert-info">
+        <strong>Root level data:</strong><br>
+        title: "{{title}}"<br>
+        readonly: {{readonly}}<br>
+        has_markets: {{has_markets}}<br>
+    </div>
+    
+    {{#markets}}
+        <div class="card mb-3">
+            <div class="card-header">
+                <strong>MARKET ITEM DEBUG</strong>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Basic fields:</strong><br>
+                        id: "{{id}}"<br>
+                        name: "{{name}}"<br>
+                        type: "{{type}}"<br>
+                        type_display: "{{type_display}}"<br>
+                        icon: "{{icon}}"<br>
+                        color: "{{color}}"<br>
+                        indent: "{{indent}}"<br>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Boolean fields:</strong><br>
+                        readonly: {{readonly}}<br>
+                        has_description: {{has_description}}<br>
+                        has_additional_fields: {{has_additional_fields}}<br>
+                        has_children: {{has_children}}<br>
+                    </div>
+                </div>
+                
+                {{#description}}
+                    <div class="mt-2">
+                        <strong>Description:</strong> "{{{description}}}"
+                    </div>
+                {{/description}}
+                
+                {{#additional_fields}}
+                    <div class="mt-2">
+                        <strong>Additional field:</strong><br>
+                        label: "{{label}}"<br>
+                        value: "{{value}}"<br>
+                        has_value: {{has_value}}<br>
+                    </div>
+                {{/additional_fields}}
+                
+                {{#add_children_buttons}}
+                    <div class="mt-2">
+                        <strong>Add children buttons found!</strong>
+                        {{#buttons}}
+                            <div class="ms-2">
+                                text: "{{text}}", title: "{{title}}", class: "{{class}}", icon: "{{icon}}"
+                            </div>
+                        {{/buttons}}
+                    </div>
+                {{/add_children_buttons}}
+                
+                {{#has_children}}
+                    <div class="mt-3 alert alert-success">
+                        <strong>✅ HAS CHILDREN - recursing...</strong>
+                        {{#children}}
+                            <div class="border-start border-3 ps-3 mt-2">
+                                <strong>CHILD:</strong><br>
+                                id: "{{id}}", name: "{{name}}", type: "{{type}}", indent: "{{indent}}"<br>
+                                {{#has_children}}
+                                    <strong>Child has grandchildren:</strong><br>
+                                    {{#children}}
+                                        <div class="ms-3">
+                                            <small>GRANDCHILD: id="{{id}}", name="{{name}}", type="{{type}}"</small>
+                                        </div>
+                                    {{/children}}
+                                {{/has_children}}
+                            </div>
+                        {{/children}}
+                    </div>
+                {{/has_children}}
+                
+                {{^has_children}}
+                    <div class="mt-2 alert alert-warning">
+                        <strong>❌ NO CHILDREN</strong>
+                    </div>
+                {{/has_children}}
+            </div>
+        </div>
+    {{/markets}}
+    
+    {{^markets}}
+        <div class="alert alert-danger">
+            <strong>❌ NO MARKETS ARRAY!</strong>
+        </div>
+    {{/markets}}
+</div>

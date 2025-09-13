@@ -1,0 +1,162 @@
+<?xml version="1.0" ?>
+<XMLDB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" PATH="mod/valuemapdoc/db" VERSION="2025041700" COMMENT="Install file for Value Map plugin">
+  <TABLES>
+    <TABLE NAME="valuemapdoc" COMMENT="Main instance table for Value Map Doc module">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Course ID"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Instance name"/>
+        <FIELD NAME="intro" TYPE="text" NOTNULL="false" COMMENT="Description"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="targetactivity" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Course module ID to save files"/>  
+        <FIELD NAME="ismaster" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Is this a Master Value Map?"/>      
+        <FIELD NAME="activity_prompt" TYPE="text" LENGTH="10" NOTNULL="false"  COMMENT="Course module ID to save files"/>        
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Group ID"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_course" UNIQUE="false" FIELDS="course"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="valuemapdoc_entries" COMMENT="Value Map entries">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="INT" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary ID"/>
+        <FIELD NAME="course" TYPE="INT" LENGTH="10" NOTNULL="false" COMMENT="Course ID"/>
+        <FIELD NAME="cid" TYPE="INT" LENGTH="10" NOTNULL="false" COMMENT="Module ID"/>
+        <FIELD NAME="userid" TYPE="INT" LENGTH="10" NOTNULL="false" COMMENT="User ID"/>
+        <FIELD NAME="timemodified" TYPE="INT" LENGTH="10" NOTNULL="false" COMMENT="Time modified"/>
+        <FIELD NAME="market" TYPE="TEXT" NOTNULL="false" COMMENT="Market"/>
+        <FIELD NAME="industry" TYPE="TEXT" NOTNULL="false" COMMENT="Industry"/>
+        <FIELD NAME="role" TYPE="TEXT" NOTNULL="false" COMMENT="Role"/>
+        <FIELD NAME="businessgoal" TYPE="TEXT" NOTNULL="false" COMMENT="Business goal"/>
+        <FIELD NAME="strategy" TYPE="TEXT" NOTNULL="false" COMMENT="Strategy"/>
+        <FIELD NAME="difficulty" TYPE="TEXT" NOTNULL="false" COMMENT="Difficulty"/>
+        <FIELD NAME="situation" TYPE="TEXT" NOTNULL="false" COMMENT="Situation"/>
+        <FIELD NAME="statusquo" TYPE="TEXT" NOTNULL="false" COMMENT="Status quo"/>
+        <FIELD NAME="coi" TYPE="TEXT" NOTNULL="false" COMMENT="Cost of inaction"/>
+        <FIELD NAME="differentiator" TYPE="TEXT" NOTNULL="false" COMMENT="Differentiator"/>
+        <FIELD NAME="impact" TYPE="TEXT" NOTNULL="false" COMMENT="Impact on difficulty"/>
+        <FIELD NAME="newstate" TYPE="TEXT" NOTNULL="false" COMMENT="New situation"/>
+        <FIELD NAME="successmetric" TYPE="TEXT" NOTNULL="false" COMMENT="Success metric"/>
+        <FIELD NAME="impactstrategy" TYPE="TEXT" NOTNULL="false" COMMENT="Impact on strategy"/>
+        <FIELD NAME="impactbusinessgoal" TYPE="TEXT" NOTNULL="false" COMMENT="Impact on business goal"/>
+        <FIELD NAME="impactothers" TYPE="TEXT" NOTNULL="false" COMMENT="Impact on other people"/>
+        <FIELD NAME="proof" TYPE="TEXT" NOTNULL="false" COMMENT="Proof"/>
+        <FIELD NAME="time2results" TYPE="TEXT" NOTNULL="false" COMMENT="Time to results"/>
+        <FIELD NAME="quote" TYPE="TEXT" NOTNULL="false" COMMENT="Client quote"/>
+        <FIELD NAME="clientname" TYPE="TEXT" NOTNULL="false" COMMENT="Client name"/>
+        <FIELD NAME="ismaster" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Is this entry shared as Master Value?"/>      
+        <FIELD NAME="maturity" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Maturity Level of this record"/>      
+      <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Group ID"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="valuemapdoc_templates" COMMENT="Document templates">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="INT" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary ID"/>
+        <FIELD NAME="name" TYPE="CHAR" LENGTH="100" NOTNULL="false" COMMENT="Template name"/>
+        <FIELD NAME="templatetype" TYPE="CHAR" LENGTH="50" NOTNULL="false" COMMENT="Template type"/>
+        <FIELD NAME="templatebody" TYPE="TEXT" NOTNULL="false" COMMENT="Template body"/>
+        <FIELD NAME="prompt" TYPE="text" NOTNULL="false" COMMENT="Prompt dla ChatGPT dla tego szablonu" />
+        <FIELD NAME="timecreated" TYPE="INT" LENGTH="10" NOTNULL="false" COMMENT="Time created"/>
+        <FIELD NAME="timemodified" TYPE="INT" LENGTH="10" NOTNULL="false" COMMENT="Time modified"/>
+        <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Group ID"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false" COMMENT="Template description"/>
+        <FIELD NAME="fields" TYPE="text" NOTNULL="false" COMMENT="Fields used by the template"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Course ID (0 = system level)"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="User ID (0 = not user-specific)"/>
+        <FIELD NAME="scope" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="system" COMMENT="Template scope: system, course, group, user"/>
+        <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="User ID who created the template"/>
+        <FIELD NAME="isactive" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" COMMENT="Is template active"/>  
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="valuemapdoc_promptlog" COMMENT="Log promptów i odpowiedzi ChatGPT">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary ID" />
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="User ID" />
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Course ID" />
+        <FIELD NAME="templateid" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="Template ID" />
+        <FIELD NAME="prompt" TYPE="text" NOTNULL="true" COMMENT="Full Prompt" />
+        <FIELD NAME="response" TYPE="text" NOTNULL="false"  COMMENT="Response" />
+        <FIELD NAME="rating" TYPE="text" NOTNULL="false"  COMMENT="Rating 0-10. -1 = no rating" />
+        <FIELD NAME="feedback" TYPE="text" NOTNULL="false"  COMMENT="Feedback" />
+        <FIELD NAME="parentid" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="Parent prompt ID" />
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Time created" />
+      <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Group ID"/>
+      <FIELD NAME="marketid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Selected market ID"/>
+      <FIELD NAME="customerid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Selected customer ID"/>
+      <FIELD NAME="personid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Selected person ID"/>
+      <FIELD NAME="opportunityid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Selected opportunity ID"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="valuemapdoc_content" COMMENT="Generated documents from Value Map module">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Course ID"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Course module ID"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="User ID"/>
+        <FIELD NAME="templateid" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="ID of the template used"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="Content Name"/>
+        <FIELD NAME="customprompt" TYPE="text" NOTNULL="false" COMMENT="Custom prompt entered by the user"/>
+        <FIELD NAME="content" TYPE="text" NOTNULL="true" COMMENT="Generated content (HTML)"/>
+        <FIELD NAME="visibility" TYPE="int" LENGTH="1" NOTNULL="false" DEFAULT="0" COMMENT="Who can view the content"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Timestamp of creation"/>
+        <FIELD NAME="effectiveness" TYPE="int" LENGTH="2" NOTNULL="false" COMMENT="User rating of document effectiveness (0-10)"/>
+        <FIELD NAME="feedback" TYPE="text" NOTNULL="false" COMMENT="Optional user comment about the document"/>
+      <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Group ID"/>
+      <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="false" DEFAULT="pending" COMMENT="Generation status (pending, ready, error)"/>
+      <FIELD NAME="marketid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Selected market ID"/>
+      <FIELD NAME="customerid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Selected customer ID"/>
+      <FIELD NAME="personid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Selected person ID"/>
+      <FIELD NAME="opportunityid" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Selected opportunity ID"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="valuemapdoc_markets" COMMENT="Markets, customers, opportunities and persons">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="INT" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary ID"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Course Module ID"/>
+        <FIELD NAME="type" TYPE="CHAR" LENGTH="20" NOTNULL="true" COMMENT="Type: market, customer, opportunity, person"/>
+        <FIELD NAME="name" TYPE="TEXT" NOTNULL="true" COMMENT="Name"/>
+        <FIELD NAME="description" TYPE="TEXT" NOTNULL="false" COMMENT="Description"/>
+        <FIELD NAME="dynamic_fields" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="JSON encoded dynamic fields based on type"/>
+        <FIELD NAME="userid" TYPE="INT" LENGTH="10" NOTNULL="true" COMMENT="User who created this entry"/>
+        <FIELD NAME="groupid" TYPE="INT" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Group ID"/>
+        <FIELD NAME="parentid" TYPE="INT" LENGTH="10" NOTNULL="false" DEFAULT="0" COMMENT="Parent entity ID (for hierarchical relationships)"/>
+        <FIELD NAME="isactive" TYPE="INT" LENGTH="1" NOTNULL="true" DEFAULT="1" COMMENT="Is entry active"/>
+        <FIELD NAME="timecreated" TYPE="INT" LENGTH="10" NOTNULL="true" COMMENT="Time created"/>
+        <FIELD NAME="timemodified" TYPE="INT" LENGTH="10" NOTNULL="true" COMMENT="Time modified"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fk_cmid" TYPE="foreign" FIELDS="cmid" REFTABLE="course_modules" REFFIELDS="id"/>
+        <KEY NAME="fk_parent" TYPE="foreign" FIELDS="parentid" REFTABLE="valuemapdoc_markets" REFFIELDS="id"/>
+        <KEY NAME="fk_user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="idx_cmid" UNIQUE="false" FIELDS="cmid"/>
+        <INDEX NAME="idx_cmid_type" UNIQUE="false" FIELDS="cmid, type"/>
+        <INDEX NAME="idx_parent" UNIQUE="false" FIELDS="parentid"/>
+        <INDEX NAME="idx_type" UNIQUE="false" FIELDS="type"/>
+        <INDEX NAME="idx_active" UNIQUE="false" FIELDS="isactive"/>
+        <INDEX NAME="idx_user" UNIQUE="false" FIELDS="userid"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

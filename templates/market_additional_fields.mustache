@@ -1,0 +1,17 @@
+{{!
+    Additional fields (baseinfo, outsideinfo, insideinfo)
+}}
+<div class="market-additional-fields mt-2">
+    {{#additional_fields}}
+        {{#has_value}}
+            <div class="additional-field mb-2 p-2" style="background-color: rgba(0,0,0,0.03); border-radius: 4px;">
+                <div class="field-label">
+                    <strong>{{label}}:</strong>
+                </div>
+                <div class="field-value text-muted">
+                    {{{value}}}
+                </div>
+            </div>
+        {{/has_value}}
+    {{/additional_fields}}
+</div>

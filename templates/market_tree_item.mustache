@@ -1,0 +1,63 @@
+{{!
+    Template: mod_valuemapdoc/market_tree_item
+    Context: Pojedynczy element w drzewie hierarchii
+}}
+
+<div class="market-tree-item type-{{type}}" style="margin-left: {{indent}}px;">
+    <div class="market-item-content">
+        <div class="market-item-info">
+            <!--span class="market-icon">{{{icon}}}</span-->
+            <span class="market-name" title="{{name}}">{{name}}</span>
+            <!--span class="market-type-badge type-{{type}}">{{type_display}}</span-->
+            {{#children_count}}
+            <span class="market-meta">{{children_count}} items</span>
+            {{/children_count}}
+            {{#has_additional_info}}
+            <i class="fa fa-info-circle market-meta" title="Has additional information"></i>
+            {{/has_additional_info}}
+        </div>
+        
+        <div class="market-actions">
+            {{#detail_url}}
+            <a href="{{{detail_url}}}" class="btn-micro btn-view" title="View details">
+                <i class="fa fa-eye"></i>
+            </a>
+            {{/detail_url}}
+            
+            {{^readonly}}
+            <a href="{{{edit_url}}}" class="btn-micro btn-edit" title="Edit {{type}}">
+                <i class="fa fa-edit"></i>
+            </a>
+            
+            {{#add_children_buttons.has_buttons}}
+            {{#add_children_buttons.single_button}}
+            {{#add_children_buttons.buttons}}
+            <a href="{{{url}}}" class="btn-micro btn-add" title="{{title}}">
+                <i class="fa fa-plus"></i> {{text}}
+            </a>
+            {{/add_children_buttons.buttons}}
+            {{/add_children_buttons.single_button}}
+            
+            {{#add_children_buttons.multiple_buttons}}
+            <div class="dropdown">
+                <button class="btn-micro btn-add dropdown-toggle" type="button" data-toggle="dropdown">
+                    <i class="fa fa-plus"></i>
+                </button>
+                <div class="dropdown-menu">
+                    {{#add_children_buttons.buttons}}
+                    <a class="dropdown-item" href="{{{url}}}">{{icon}} {{text}}</a>
+                    {{/add_children_buttons.buttons}}
+                </div>
+            </div>
+            {{/add_children_buttons.multiple_buttons}}
+            {{/add_children_buttons.has_buttons}}
+            {{/readonly}}
+        </div>
+    </div>
+</div>
+
+{{#has_children}}
+{{#children}}
+{{> mod_valuemapdoc/market_tree_item }}
+{{/children}}
+{{/has_children}}

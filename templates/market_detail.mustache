@@ -1,0 +1,162 @@
+{{!
+    Detailed market view
+}}
+<div class="market-detail">
+    <!-- Header with breadcrumb -->
+    <div class="market-detail-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2>
+                    <span class="market-icon me-2" style="font-size: 1.5em;">{{icon}}</span>
+                    {{name}}
+                    <span class="badge bg-{{type_color}} ms-2">{{type_display}}</span>
+                </h2>
+                {{#breadcrumb_path}}
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            {{#breadcrumb}}
+                                <li class="breadcrumb-item">
+                                    {{#is_current}}
+                                        <span class="text-muted">{{name}}</span>
+                                    {{/is_current}}
+                                    {{^is_current}}
+                                        <a href="{{{detail_url}}}">{{name}}</a>
+                                    {{/is_current}}
+                                </li>
+                            {{/breadcrumb}}
+                        </ol>
+                    </nav>
+                {{/breadcrumb_path}}
+            </div>
+            
+            <div class="market-detail-actions">
+                <a href="{{{back_url}}}" class="btn btn-secondary">
+                    <i class="fa fa-arrow-left"></i> Back to List
+                </a>
+                <a href="{{{edit_url}}}" class="btn btn-primary">
+                    <i class="fa fa-edit"></i> Edit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Basic Information -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fa fa-info-circle"></i> Basic Information</h5>
+                </div>
+                <div class="card-body">
+                    {{#has_description}}
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Description:</strong></label>
+                            <div class="border p-3 bg-light rounded">
+                                {{{description}}}
+                            </div>
+                        </div>
+                    {{/has_description}}
+                    
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <strong>Type:</strong> {{type_display}}
+                        </div>
+                        <div class="col-sm-6">
+                            <strong>Created:</strong> {{created_date}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Fields -->
+            {{#has_additional_fields}}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fa fa-list-alt"></i> {{type_display}} Specific Information</h5>
+                    </div>
+                    <div class="card-body">
+                        {{#additional_fields}}
+                            {{#has_value}}
+                                <div class="mb-3">
+                                    <label class="form-label"><strong>{{label}}:</strong></label>
+                                    <div class="border p-3 bg-light rounded">
+                                        {{{value}}}
+                                    </div>
+                                </div>
+                            {{/has_value}}
+                        {{/additional_fields}}
+                    </div>
+                </div>
+            {{/has_additional_fields}}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6><i class="fa fa-bolt"></i> Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    {{#add_children_buttons}}
+                        {{#buttons}}
+                            <a href="{{{url}}}" class="btn {{class}} btn-sm d-block mb-2">
+                                <i class="fa {{icon}}"></i> {{text}}
+                            </a>
+                        {{/buttons}}
+                    {{/add_children_buttons}}
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            {{#has_statistics}}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6><i class="fa fa-chart-bar"></i> Statistics</h6>
+                    </div>
+                    <div class="card-body">
+                        {{#statistics}}
+                            <div class="d-flex justify-content-between">
+                                <span>{{label}}:</span>
+                                <strong>{{count}}</strong>
+                            </div>
+                        {{/statistics}}
+                    </div>
+                </div>
+            {{/has_statistics}}
+        </div>
+    </div>
+
+    <!-- Children -->
+    {{#has_children}}
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fa fa-sitemap"></i> Related {{type_display}}s</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {{#children}}
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="card border-{{type_color}}">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <span class="me-1">{{icon}}</span>
+                                        <a href="{{{detail_url}}}" class="text-decoration-none">{{name}}</a>
+                                    </h6>
+                                    <p class="card-text small text-muted">{{type_display}}</p>
+                                    {{#short_description}}
+                                        <p class="card-text small">{{short_description}}</p>
+                                    {{/short_description}}
+                                    <div class="d-flex justify-content-between">
+                                        <a href="{{{detail_url}}}" class="btn btn-outline-primary btn-sm">View</a>
+                                        <a href="{{{edit_url}}}" class="btn btn-outline-secondary btn-sm">Edit</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {{/children}}
+                </div>
+            </div>
+        </div>
+    {{/has_children}}
+</div>

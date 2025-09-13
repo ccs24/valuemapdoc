@@ -1,0 +1,302 @@
+.valuemap-entry-master {
+    background-color: #f5f5f5;
+    border-left: 4px solid #666;
+    color: #444;
+    font-style: italic;
+}
+
+.valuemapdoc-preview{
+    color: black;
+    font-size: 16px;
+    line-height: 1.3em;
+}
+
+#valuemap-table-js {
+    width: 100%;
+}
+
+#valuemap-tabulator-wrapper {
+    height: 100vh;
+    width: 100vw;
+    padding: 0;
+    margin: 0;
+    overflow: auto;
+}
+
+#valuemap-tabulator-table {
+    height: 100%;
+    width: 100%;
+}
+
+.tabulator-row .tabulator-cell {
+    white-space: normal !important;
+    word-break: break-word;
+}
+
+.tabulator-cell[tabulator-field]:hover {
+    background-color: #f0f8ff;
+    cursor: pointer;
+}
+
+.tabulator-row.ismaster:hover {
+    background-color: green;/*#e0f0ff; eaffea;*/
+    cursor: pointer;
+}
+
+.tabulator-editing textarea {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-y: auto;
+    min-height: 60px;
+}
+
+/* Zwiększ szerokość i wysokość edytora TinyMCE */
+.mform .form-group .editor .editor_tinymce {
+    width: 100%;
+    min-height: 500px;
+}
+
+.editor_tinymce iframe {
+    min-height: 500px !important;
+    width: 100% !important;
+}
+
+/* Zwiększ szerokość kontenera formularza */
+body.path-mod-valuemapdoc .mform {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+.tab-content>.active {
+    padding: 25px 0;
+    margin: 0;
+}   
+
+/* ----- *-------------------------------------------------- */ 
+/* Tabulator */
+.tabulator {
+    width: 100%;
+    height: 100%;
+}
+.tabulator .tabulator-header {
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ccc;
+}
+.tabulator .tabulator-header .tabulator-col {
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #ccc;
+}
+.tab-content .tab {
+    display: none;
+}
+.tab-content .tab.active {
+    display: block;
+}
+.tab-links .tab-link.active {
+    font-weight: bold;
+    color: blue;
+}
+
+
+/* ----- *-------------------------------------------------- */ 
+/* ukrywanie interface moodle */
+body.valuemapdoc-fullscreen #page-header,      
+body.valuemapdoc-fullscreen #nav-drawer, 
+body.valuemapdoc-fullscreen .region-main-settings-menu,
+body.valuemapdoc-fullscreen .page-context-header, 
+body.valuemapdoc-fullscreen .footer,
+body.valuemapdoc-fullscreen .page-footer,
+
+body.valuemapdoc-fullscreen .header,
+body.valuemapdoc-fullscreen #page-navbar,
+body.valuemapdoc-fullscreen .navbar,
+body.valuemapdoc-fullscreen #page-footer,
+body.valuemapdoc-fullscreen .drawer,
+body.valuemapdoc-fullscreen .secondary-navigation,
+body.valuemapdoc-fullscreen .breadcrumb,
+body.valuemapdoc-fullscreen .page-context-header,
+body.valuemapdoc-fullscreen .block_drawer 
+body.valuemapdoc-fullscreen .block_drawer .block_drawer-content,
+body.valuemapdoc-fullscreen #valuemapdocTabs {
+    display: none !important;
+    visibility: hidden !important; 
+
+}
+
+
+/* Ukrywanie pustych drawerów (lewy i prawy pasek) * /
+body.valuemapdoc-fullscreen #nav-drawer,
+body.valuemapdoc-fullscreen .drawer,
+body.valuemapdoc-fullscreen .block_drawer {
+    display: none !important;
+}
+*/
+
+body.valuemapdoc-fullscreen #region-main, 
+body.valuemapdoc-fullscreen #page, 
+body.valuemapdoc-fullscreen .main-inner {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+body.valuemapdoc-fullscreen .toolbar,
+body.valuemapdoc-fullscreen #valuemap-table-js {
+    width: 100% !important;
+}
+/* ----- *-------------------------------------------------- */ 
+/* ukrywanie interface moodle */
+
+/* Pełnoekranowy widok - dodatkowe poprawki */
+body.valuemapdoc-fullscreen,
+html {
+    height: 100% !important;
+    overflow: auto !important;
+    overscroll-behavior: contain;
+}
+
+body.valuemapdoc-fullscreen #page,
+body.valuemapdoc-fullscreen #region-main,
+body.valuemapdoc-fullscreen #region-main-box,
+body.valuemapdoc-fullscreen #region-main .card,
+body.valuemapdoc-fullscreen #region-main .card-body {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+body.valuemapdoc-fullscreen .container,
+body.valuemapdoc-fullscreen .container-fluid,
+body.valuemapdoc-fullscreen .row,
+body.valuemapdoc-fullscreen .col-12,
+body.valuemapdoc-fullscreen .card {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: none !important;
+}
+
+body.valuemapdoc-fullscreen #valuemap-tabulator-wrapper,
+body.valuemapdoc-fullscreen #valuemap-table-js {
+    height: 100% !important;
+    width: 100% !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+body.valuemapdoc-fullscreen .action-menu,
+body.valuemapdoc-fullscreen .dropdown-menu,
+body.valuemapdoc-fullscreen .editing_button 
+body.valuemapdoc-fullscreen .drawer-toggler .drawer-left-toggle .open-nav {
+    display: none !important;
+}
+
+body.valuemapdoc-fullscreen .tab-content>.active {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Dodaj to do style.css modułu lub w head strony */
+
+
+/* RATE CONTENT STYLING */
+
+/* Lepsze odstępy dla kart w lewej kolumnie */
+.rate-content-sidebar .card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #e9ecef;
+}
+
+.rate-content-sidebar .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    font-weight: 600;
+}
+
+/* Lepsze przyciski w lewej kolumnie */
+.rate-content-sidebar .btn {
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.rate-content-sidebar .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Toolbar nad treścią */
+.content-toolbar {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+.content-toolbar .btn-group .btn {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+    font-weight: 500;
+}
+
+/* Podgląd treści */
+.content-preview {
+    background-color: #ffffff;
+    border: 2px solid #e9ecef;
+    border-radius: 0.5rem;
+    font-family: Georgia, serif;
+    line-height: 1.6;
+}
+
+.content-preview h1, 
+.content-preview h2, 
+.content-preview h3 {
+    color: #495057;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Sekcja oceny */
+.rating-section .card {
+    border: 2px solid #007bff;
+    border-radius: 0.5rem;
+}
+
+.rating-section .card-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    font-weight: 600;
+}
+
+/* Radio buttons dla oceny */
+.rating-section .form-check-input[type="radio"] {
+    transform: scale(1.2);
+    margin-right: 0.5rem;
+}
+
+.rating-section .form-check-label {
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* Responsywność */
+@media (max-width: 768px) {
+    .content-toolbar {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .content-toolbar .btn-group {
+        margin-top: 1rem;
+        width: 100%;
+    }
+    
+    .content-toolbar .btn {
+        flex: 1;
+    }
+}

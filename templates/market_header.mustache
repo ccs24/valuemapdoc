@@ -1,0 +1,110 @@
+{{!
+    Market item header with name, type and actions (including detail view)
+}}
+<div class="market-header d-flex justify-content-between align-items-center">
+    <div class="market-info flex-grow-1">
+        <div class="d-flex align-items-center">
+            <!-- span class="market-icon me-2" 
+                  style="font-size: 1.4em; color: {{color}}; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));">
+                {{icon}}
+            </span -->
+            <div>
+                {{! Klikalna nazwa prowadząca do szczegółów }}
+                <h5 class="market-name mb-0 fw-bold">
+                    <a href="{{{detail_url}}}" 
+                       class="text-decoration-none" 
+                       style="color: {{color}};"
+                       title="Zobacz szczegóły: {{name}}"
+                       data-bs-toggle="tooltip">
+                        {{name}}
+                    </a>
+                </h5>
+                <!--div class="market-meta">
+                    <span class="badge rounded-pill" style="background-color: {{color}}22; color: {{color}}; border: 1px solid {{color}}44;">
+                        {{type_display}}
+                    </span>
+                    {{#breadcrumb}}
+                        <small class="text-muted ms-2">
+                            <i class="fa fa-angle-right"></i> 
+                            <span class="breadcrumb-text">{{breadcrumb}}</span>
+                        </small>
+                    {{/breadcrumb}}
+                </div-->
+            </div>
+        </div>
+    </div>
+    
+    {{^readonly}}
+        <div class="market-actions">
+            {{! Main actions - including dedicated detail button }}
+            <div class="btn-group btn-group-sm" role="group">
+                <!--a href="{{{detail_url}}}" 
+                   class="btn btn-outline-info" 
+                   title="Zobacz szczegóły {{type_display}}"
+                   data-bs-toggle="tooltip">
+                    <i class="fa fa-eye"></i>
+                    <span class="d-none d-md-inline ms-1">Szczegóły</span>
+                </a -->
+                
+                <a href="{{{edit_url}}}" 
+                   class="btn btn-outline-primary" 
+                   title="Edytuj {{type_display}}"
+                   data-bs-toggle="tooltip">
+                    <i class="fa fa-edit"></i>
+                    <span class="d-none d-md-inline ms-1">Edytuj</span>
+                </a>
+        
+                <button class="btn btn-outline-danger" 
+                        onclick="confirmDeleteMarket('{{name}}', '{{{delete_url}}}', '{{type_display}}')"
+                        title="Usuń {{type_display}}"
+                        data-bs-toggle="tooltip">
+                    <i class="fa fa-trash"></i>
+                    <span class="d-none d-md-inline ms-1">Usuń</span>
+                </button>
+            </div>
+    
+{{! Przyciski dodawania - tylko jeśli są dostępne opcje }}
+            {{#add_children_buttons}}
+                {{#has_buttons}}
+                <div class="btn-group btn-group-sm ms-2" role="group">
+                    {{#buttons}}
+                        {{! Jeśli tylko jedna opcja - pokaż jako zwykły przycisk }}
+                        {{#single_button}}
+                            <a href="{{{url}}}" 
+                               class="btn btn-outline-success" 
+                               title="{{title}}">
+                                <i class="fa {{icon}}"></i>
+                                <span class="d-none d-lg-inline ms-1">{{text}}</span>
+                            </a>
+                        {{/single_button}}
+                    {{/buttons}}
+                    
+                    {{! Jeśli więcej opcji - pokaż dropdown }}
+                    {{#multiple_buttons}}
+                    <button class="btn btn-outline-secondary dropdown-toggle" 
+                            type="button" 
+                            data-bs-toggle="dropdown"
+                            data-toggle="dropdown"
+                            aria-expanded="false"
+                            title="Dodaj element podrzędny">
+                        <i class="fa fa-plus"></i>
+                        <span class="d-none d-lg-inline ms-1">Dodaj</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        {{#buttons}}
+                        <li>
+                            <a class="dropdown-item" href="{{{url}}}" title="{{title}}">
+                                <i class="fa {{icon}} me-2"></i>{{text}}
+                            </a>
+                        </li>
+                        {{/buttons}}
+                    </ul>
+                    {{/multiple_buttons}}
+                </div>
+                {{/has_buttons}}
+            {{/add_children_buttons}}
+        </div>
+    {{/readonly}}
+    
+</div>
+

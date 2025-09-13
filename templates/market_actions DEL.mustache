@@ -1,0 +1,24 @@
+{{!
+    Action buttons for market item
+}}
+<div class="btn-group btn-group-sm" role="group">
+    <a href="{{edit_url}}" class="btn btn-outline-primary" title="Edit {{type_display}}">
+        <i class="fa fa-edit"></i> Edit
+    </a>
+    
+    <a href="{{delete_url}}" class="btn btn-outline-danger" 
+       onclick="return confirm('Delete this {{type_display}}? This will also delete all related records.');"
+       title="Delete {{type_display}}">
+        <i class="fa fa-trash"></i> Delete
+    </a>
+</div>
+
+{{#add_children_buttons}}
+    <div class="btn-group btn-group-sm ms-2" role="group">
+        {{#buttons}}
+            <a href="{{url}}" class="btn {{class}}" title="{{title}}">
+                <i class="fa {{icon}}"></i> {{text}}
+            </a>
+        {{/buttons}}
+    </div>
+{{/add_children_buttons}}

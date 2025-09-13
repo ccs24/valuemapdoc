@@ -1,0 +1,460 @@
+{{!
+    === ENHANCED markets_hierarchy.mustache ===
+}}
+<div class="markets-hierarchy">
+    <div class="markets-header d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="mb-1 d-flex align-items-center">
+                <i class="fa fa-sitemap me-2"></i>{{title}}
+            </h3>
+            {{#markets_count}}
+                <small class="text-muted">
+                    <i class="fa fa-info-circle"></i> 
+                    Łącznie rynków: <strong>{{markets_count}}</strong>
+                    {{#max_depth}} | Maks. głębokość: <strong>{{max_depth}}</strong>{{/max_depth}}
+                </small>
+            {{/markets_count}}
+        </div>
+        
+        {{^readonly}}
+        <div class="markets-toolbar">
+            <div class="btn-group btn-group-sm me-2" role="group">
+                <button class="btn btn-outline-secondary" 
+                        id="expand-all-markets" 
+                        title="Rozwiń wszystkie poziomy">
+                    <i class="fa fa-plus-square"></i> Rozwiń
+                </button>
+                <button class="btn btn-outline-secondary" 
+                        id="collapse-all-markets" 
+                        title="Zwiń wszystkie poziomy">
+                    <i class="fa fa-minus-square"></i> Zwiń
+                </button>
+            </div>
+            
+            <div class="btn-group btn-group-sm me-2" role="group">
+                <button class="btn btn-outline-info" 
+                        id="toggle-tree-lines" 
+                        title="Pokaż/ukryj linie drzewa">
+                    <i class="fa fa-share-alt"></i> Linie
+                </button>
+                <button class="btn btn-outline-success" 
+                        id="toggle-compact-view" 
+                        title="Widok kompaktowy">
+                    <i class="fa fa-compress"></i> Kompakt
+                </button>
+            </div>
+            
+            <a href="{{add_market_url}}" class="btn btn-primary btn-sm">
+                <i class="fa fa-plus"></i> Dodaj rynek
+            </a>
+        </div>
+        {{/readonly}}
+    </div>
+
+    <div class="markets-container">
+        {{#has_markets}}
+            <div class="markets-tree" id="markets-tree">
+                {{#markets}}
+                    {{> mod_valuemapdoc/enhanced_market_item }}
+                {{/markets}}
+            </div>
+        {{/has_markets}}
+        
+        {{^has_markets}}
+            <div class="alert alert-info text-center py-4">
+                <i class="fa fa-info-circle fa-3x mb-3 text-muted"></i>
+                <h5>Brak rynków</h5>
+                <p class="text-muted">Nie znaleziono żadnych rynków w systemie.</p>
+                {{^readonly}}
+                    <a href="{{add_market_url}}" class="btn btn-primary">
+                        <i class="fa fa-plus"></i> Dodaj pierwszy rynek
+                    </a>
+                {{/readonly}}
+            </div>
+        {{/has_markets}}
+    </div>
+</div>
+
+{{!
+    === ENHANCED market_item.mustache (renamed to enhanced_market_item.mustache) ===
+}}
+<div class="market-item mb-2 {{type}}-item" 
+     data-market-id="{{id}}"
+     data-level="{{level}}"
+     data-parent-id="{{parent_id}}"
+     style="--indent-level: {{level}};">
+    
+    <div class="market-wrapper" 
+         style="margin-left: calc({{indent}}px + var(--tree-line-offset, 0px)); 
+                border-left: 3px solid {{color}}; 
+                background: linear-gradient(135deg, {{color}}08 0%, {{color}}04 100%);">
+        
+        <div class="market-content p-3 position-relative">
+            {{! Tree connection lines }}
+            <div class="tree-lines d-none">
+                {{#show_vertical_line}}<div class="tree-line-vertical"></div>{{/show_vertical_line}}
+                {{#show_horizontal_line}}<div class="tree-line-horizontal"></div>{{/show_horizontal_line}}
+            </div>
+            
+            {{! Collapse/Expand button for children }}
+            {{#has_children}}
+                <button class="btn btn-sm btn-outline-dark market-toggle position-absolute" 
+                        style="left: -15px; top: 12px; z-index: 10; width: 28px; height: 28px; border-radius: 50%;"
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#market-children-{{id}}" 
+                        aria-expanded="true"
+                        title="Rozwiń/zwiń podkategorie">
+                    <i class="fa fa-minus toggle-icon"></i>
+                </button>
+            {{/has_children}}
+            
+            {{> mod_valuemapdoc/enhanced_market_header }}
+            
+            {{#has_description}}
+                <div class="market-description mt-2">
+                    <div class="text-muted small border-start border-2 ps-3" style="border-color: {{color}} !important;">
+                        {{{description}}}
+                    </div>
+                </div>
+            {{/has_description}}
+            
+            {{#statistics}}
+                <div class="market-stats mt-2">
+                    <div class="row g-2">
+                        {{#opportunities_count}}
+                        <div class="col-auto">
+                            <span class="badge bg-primary">
+                                <i class="fa fa-lightbulb-o"></i> {{opportunities_count}} okazji
+                            </span>
+                        </div>
+                        {{/opportunities_count}}
+                        {{#total_value}}
+                        <div class="col-auto">
+                            <span class="badge bg-success">
+                                <i class="fa fa-dollar"></i> {{total_value}}
+                            </span>
+                        </div>
+                        {{/total_value}}
+                        {{#children_count}}
+                        <div class="col-auto">
+                            <span class="badge bg-info">
+                                <i class="fa fa-sitemap"></i> {{children_count}} pod-rynków
+                            </span>
+                        </div>
+                        {{/children_count}}
+                    </div>
+                </div>
+            {{/statistics}}
+        </div>
+    </div>
+    
+    {{#has_children}}
+        <div class="collapse show market-children" id="market-children-{{id}}">
+            <div class="children-container">
+                {{#children}}
+                    {{> mod_valuemapdoc/enhanced_market_item }}
+                {{/children}}
+            </div>
+        </div>
+    {{/has_children}}
+</div>
+
+{{!
+    === ENHANCED market_header.mustache (renamed to enhanced_market_header.mustache) ===
+}}
+<div class="market-header d-flex justify-content-between align-items-center">
+    <div class="market-info flex-grow-1">
+        <div class="d-flex align-items-center">
+            <span class="market-icon me-2" 
+                  style="font-size: 1.4em; color: {{color}}; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));">
+                {{icon}}
+            </span>
+            <div>
+                <h5 class="market-name mb-0 fw-bold">{{name}}</h5>
+                <div class="market-meta">
+                    <span class="badge rounded-pill" style="background-color: {{color}}22; color: {{color}}; border: 1px solid {{color}}44;">
+                        {{type_display}}
+                    </span>
+                    {{#breadcrumb}}
+                        <small class="text-muted ms-2">
+                            <i class="fa fa-angle-right"></i> 
+                            <span class="breadcrumb-text">{{breadcrumb}}</span>
+                        </small>
+                    {{/breadcrumb}}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {{^readonly}}
+        <div class="market-actions">
+            {{! Main actions }}
+            <div class="btn-group btn-group-sm" role="group">
+                <a href="{{edit_url}}" 
+                   class="btn btn-outline-primary" 
+                   title="Edytuj {{type_display}}"
+                   data-bs-toggle="tooltip">
+                    <i class="fa fa-edit"></i>
+                    <span class="d-none d-md-inline ms-1">Edytuj</span>
+                </a>
+        
+                <button class="btn btn-outline-danger" 
+                        onclick="confirmDeleteMarket('{{name}}', '{{delete_url}}', '{{type_display}}')"
+                        title="Usuń {{type_display}}"
+                        data-bs-toggle="tooltip">
+                    <i class="fa fa-trash"></i>
+                    <span class="d-none d-md-inline ms-1">Usuń</span>
+                </button>
+            </div>
+    
+            {{#add_children_buttons}}
+            <div class="btn-group btn-group-sm ms-2" role="group">
+                <button class="btn btn-outline-secondary dropdown-toggle" 
+                        type="button" 
+                        data-bs-toggle="dropdown" 
+                        aria-expanded="false"
+                        title="Dodaj element podrzędny">
+                    <i class="fa fa-plus"></i>
+                    <span class="d-none d-lg-inline ms-1">Dodaj</span>
+                </button>
+                <ul class="dropdown-menu">
+                    {{#buttons}}
+                    <li>
+                        <a class="dropdown-item" href="{{url}}" title="{{title}}">
+                            <i class="fa {{icon}} me-2"></i>{{text}}
+                        </a>
+                    </li>
+                    {{/buttons}}
+                </ul>
+            </div>
+            {{/add_children_buttons}}
+        </div>
+    {{/readonly}}
+</div>
+
+<style>
+:root {
+    --tree-line-color: #dee2e6;
+    --tree-line-width: 2px;
+    --market-hover-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    --transition-duration: 0.2s;
+}
+
+.markets-hierarchy {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.markets-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.market-item {
+    position: relative;
+    transition: all var(--transition-duration) ease;
+}
+
+.market-wrapper {
+    border-radius: 8px;
+    transition: all var(--transition-duration) ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.market-item:hover .market-wrapper {
+    box-shadow: var(--market-hover-shadow);
+    transform: translateY(-1px);
+}
+
+.market-toggle {
+    background: white !important;
+    border: 2px solid #dee2e6 !important;
+    transition: all var(--transition-duration) ease;
+}
+
+.market-toggle:hover {
+    border-color: #0d6efd !important;
+    color: #0d6efd !important;
+}
+
+.market-toggle[aria-expanded="false"] .toggle-icon:before {
+    content: "\f067"; /* fa-plus */
+}
+
+.market-toggle[aria-expanded="true"] .toggle-icon:before {
+    content: "\f068"; /* fa-minus */
+}
+
+/* Tree lines styling */
+.markets-tree.show-tree-lines .tree-lines {
+    display: block !important;
+}
+
+.tree-line-vertical {
+    position: absolute;
+    left: -20px;
+    top: 0;
+    bottom: 0;
+    width: var(--tree-line-width);
+    background-color: var(--tree-line-color);
+}
+
+.tree-line-horizontal {
+    position: absolute;
+    left: -20px;
+    top: 20px;
+    width: 15px;
+    height: var(--tree-line-width);
+    background-color: var(--tree-line-color);
+}
+
+/* Compact view */
+.markets-tree.compact-view .market-wrapper {
+    padding: 0.5rem !important;
+}
+
+.markets-tree.compact-view .market-description {
+    display: none;
+}
+
+.markets-tree.compact-view .market-stats {
+    display: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .markets-toolbar {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .market-item {
+        margin-left: 0 !important;
+    }
+    
+    .market-wrapper {
+        margin-left: calc(var(--indent-level) * 15px) !important;
+    }
+    
+    .market-actions .btn-group {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 576px) {
+    .markets-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .market-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .market-actions {
+        justify-content: center;
+    }
+}
+
+/* Animation for collapse/expand */
+.market-children {
+    transition: all 0.3s ease;
+}
+
+.market-children.collapsing {
+    opacity: 0.5;
+}
+
+/* Breadcrumb styling */
+.breadcrumb-text {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const marketsTree = document.getElementById('markets-tree');
+    /*
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    */
+    
+    // Expand all markets
+    document.getElementById('expand-all-markets')?.addEventListener('click', function() {
+        const collapses = document.querySelectorAll('.market-children.collapse:not(.show)');
+        collapses.forEach(collapse => {
+            const toggle = document.querySelector(`[data-bs-target="#${collapse.id}"]`);
+            if (toggle && toggle.getAttribute('aria-expanded') === 'false') {
+                toggle.click();
+            }
+        });
+    });
+    
+    // Collapse all markets
+    document.getElementById('collapse-all-markets')?.addEventListener('click', function() {
+        const collapses = document.querySelectorAll('.market-children.collapse.show');
+        collapses.forEach(collapse => {
+            const toggle = document.querySelector(`[data-bs-target="#${collapse.id}"]`);
+            if (toggle && toggle.getAttribute('aria-expanded') === 'true') {
+                toggle.click();
+            }
+        });
+    });
+    
+    // Toggle tree lines
+    document.getElementById('toggle-tree-lines')?.addEventListener('click', function() {
+        marketsTree?.classList.toggle('show-tree-lines');
+        this.classList.toggle('active');
+    });
+    
+    // Toggle compact view
+    document.getElementById('toggle-compact-view')?.addEventListener('click', function() {
+        marketsTree?.classList.toggle('compact-view');
+        this.classList.toggle('active');
+        
+        const icon = this.querySelector('i');
+        if (marketsTree?.classList.contains('compact-view')) {
+            icon.className = 'fa fa-expand';
+        } else {
+            icon.className = 'fa fa-compress';
+        }
+    });
+    
+    // Enhanced delete confirmation
+    window.confirmDeleteMarket = function(name, deleteUrl, type) {
+        const confirmed = confirm(
+            `Czy na pewno chcesz usunąć ${type.toLowerCase()}: "${name}"?\n\n` +
+            `Uwaga: Zostaną również usunięte wszystkie powiązane rekordy i pod-elementy.`
+        );
+        
+        if (confirmed) {
+            window.location.href = deleteUrl;
+        }
+    };
+    
+    // Auto-hide alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            }
+        }, 5000);
+    });
+});
+</script>
