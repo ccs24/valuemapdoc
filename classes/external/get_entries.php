@@ -3,10 +3,6 @@ namespace mod_valuemapdoc\external;
 
 require_once("$CFG->libdir/externallib.php");
 
-//require_once($CFG->dirroot.'/mod/valuemapdoc/classes/Logger.php');
-//use mod_valuemapdoc\Logger;
-
-
 use external_api;
 use external_function_parameters;
 use external_single_structure;
@@ -28,21 +24,31 @@ class get_entries extends external_api {
         ]);
     }
 
-    public static function execute($courseid, $cmid, $include_master = 0, $groupid = 0) {
+    public static function execute($courseid=0, $cmid=0, $include_master = 0, $groupid = 0) {
         global $DB, $USER;
 
-/*        return [
-            'cmid' => $cmid,
-            'courseid' => $courseid,
-            'include_master' => $include_master
-        ]; */
-        /*
+
+        // DEBUG - sprawdź co otrzymujemy
+        error_log('GET_ENTRIES DEBUG: Raw params - courseid=' . var_export($courseid, true) . 
+              ', cmid=' . var_export($cmid, true) . 
+              ', include_master=' . var_export($include_master, true) . 
+              ', groupid=' . var_export($groupid, true));
+
+
+        // POPRAWKA: Musi być validate_parameters!
         $params = self::validate_parameters(self::execute_parameters(), [
             'courseid' => $courseid,
             'cmid' => $cmid,
             'include_master' => $include_master,
+            'groupid' => $groupid,
         ]);
-        */
+        
+        // Użyj zwalidowanych parametrów
+        $courseid = $params['courseid'];
+        $cmid = $params['cmid'];
+        $include_master = $params['include_master'];
+        $groupid = $params['groupid'];
+
         $context = context_course::instance($courseid);
         self::validate_context($context);
 
@@ -60,261 +66,125 @@ class get_entries extends external_api {
 
         $hasallgroups = has_capability('moodle/site:accessallgroups', $context);
         
-        $params = [
-                'cid' => $cm->id,
-                'userid' => $USER->id,
-            ];
+        $sql_params = [
+            'cid' => $cm->id,
+        ];
 
+        // Podstawowa kwerenda
+        $sql = "SELECT e.*, 
+                       u.username, u.email, u.firstname, u.lastname,
+                       CONCAT(u.firstname, ' ', u.lastname) as fullname
+                FROM {valuemapdoc_entries} e
+                JOIN {user} u ON u.id = e.userid
+                WHERE e.cid = :cid";
 
+        // Filtrowanie grup
+        if ($groupmode == SEPARATEGROUPS && !$hasallgroups) {
+            $usergroups = groups_get_user_groups($cm->course, $USER->id);
+            if (!empty($usergroups[0])) {
+                $grouplist = implode(',', $usergroups[0]);
+                $sql .= " AND e.groupid IN ($grouplist)";
+            } else {
+                // User nie należy do żadnej grupy - nie widzi niczego
+                $sql .= " AND e.groupid = -1";
+            }
+        }
 
-        if (($include_master > 0)) {
-            //$mastercm = get_coursemodule_from_instance//
+        // Dodanie master entries jeśli wymagane
+        if ($include_master > 0) {
             $mastercm = get_coursemodule_from_id('valuemapdoc', $include_master, 0, false, MUST_EXIST);
             $mastergroupmode = groups_get_activity_groupmode($mastercm);
             $mastergroupid = groups_get_activity_group($mastercm);
-
-            // Czy użytkownik ma prawo przeglądać grupy?
-            $hasallgroups = has_capability('moodle/site:accessallgroups', $context);
-
-
-            $params['include_master' ] = $mastercm->id;
-
-
-            switch ($mastergroupmode) {
-                case SEPARATEGROUPS: //MASTER oddzielna grupa
-                    $mastergroups = groups_get_user_groups($mastercm->course, $USER->id);
-                    if (empty($mastergroups[0])) {
-                    // User does not belong to any group in Master, and Master uses separate groups.
-                        return [];
-                    }
-
-
-                    switch ($groupmode) { // lokalnie oddzielne grupy zdalnie oddzielne grupy
-                        case SEPARATEGROUPS:
-                        if ($hasallgroups && $groupid > 0) {
-                            // SAY — admin wybrał grupę
-                            $params['groupid_slave'] = $groupid;
-                            $params['groupid_master'] = $groupid;
-                            $where = '((cid = :cid AND groupid = :groupid_slave) OR (cid = :include_master AND groupid = :groupid_master))';
-                         } else if($hasallgroups && $groupid == 0) {
-                            $where = '((cid = :cid) OR (cid = :include_master))';
-                        } else{
-                            // SBY — zwykły użytkownik lub admin bez grupy — tylko jego grupa
-                            $params['groupid_slave'] = $gid;
-                            $params['groupid_master'] = $gid;
-                            $where = '((cid = :cid AND groupid = :groupid_slave) OR (cid = :include_master AND groupid = :groupid_master))';
-                        }
-                        break;
-                        case VISIBLEGROUPS: //lokalnie visible groups zdalnie oddzielne grupy
-                            if ($hasallgroups && $groupid > 0) {
-                                $params['groupid_slave'] = $groupid;
-                                $params['groupid_master'] = $groupid;
-                                $where = '((cid = :cid AND groupid = :groupid_slave) OR (cid = :include_master AND groupid = :groupid_master))';
-                           } else {
-                                $params['groupid_master'] = $gid;
-                                $where = '((cid = :cid) OR (cid = :include_master AND groupid = :groupid_master))';
-                            }
-                        break;
-                        case NOGROUPS: //lokalnie nogroups zdalnie oddzielne grupy
-                            // W NOGROUPS nic nie zmieniamy
-                                $params['groupid_master'] = $gid;
-                                $where = '((cid = :cid) OR (cid = :include_master AND groupid = :groupid_master))';
-                        break;
-                    } //switch
-
-//               
-                    break;
-                case VISIBLEGROUPS: //Master widzialne grupy -> gdy 
-                    switch ($groupmode) { // lokalnie oddzielne grupy zdalnie oddzielne grupy
-                        case SEPARATEGROUPS:
-                        if ($hasallgroups && $groupid > 0) {
-                            // SAY — admin wybrał grupę
-                            $params['groupid_slave'] = $groupid;
-                            $params['groupid_master'] = $groupid;
-                            $where = '((cid = :cid AND groupid = :groupid_slave) OR (cid = :include_master AND groupid = :groupid_master))';
-                        } else {
-                            // SBY — zwykły użytkownik lub admin bez grupy — tylko jego grupa
-                            $params['groupid_slave'] = $gid;
-                            $where = '((cid = :cid AND groupid = :groupid_slave) OR (cid = :include_master))';// AND groupid = :groupid_master))';
-                        }
-                        break;
-                        case VISIBLEGROUPS: //lokalnie visible groups zdalnie oddzielne grupy
-                            if ($hasallgroups && $groupid > 0) {
-                                $params['groupid_slave'] = $groupid;
-                                $params['groupid_master'] = $groupid;
-                                $where = '((cid = :cid AND groupid = :groupid_slave) OR (cid = :include_master AND groupid = :groupid_master))';
-                           } else {
-                                $params['groupid_master'] = $gid;
-                                $where = '((cid = :cid) OR (cid = :include_master AND groupid = :groupid_master))';
-                            }
-                        break;
-                        case NOGROUPS: //lokalnie nogroups zdalnie oddzielne grupy
-                            // W NOGROUPS nic nie zmieniamy
-                                $params['groupid_master'] = $gid;
-                                $where = '((cid = :cid) OR (cid = :include_master AND groupid = :groupid_master))';
-                        break;
-                    } //switch
-
-                    break;
-                case NOGROUPS:
-                        // Master nie ma grup
-                    switch ($groupmode) { // lokalnie oddzielne grupy zdalnie oddzielne grupy
-                        case SEPARATEGROUPS:
-                        if ($hasallgroups && $groupid > 0) {
-                            // SAY — admin wybrał grupę
-                            $params['groupid_slave'] = $groupid;
-                            $params['groupid_master'] = $groupid;
-                            $where = '((cid = :cid AND groupid = :groupid_slave) OR (cid = :include_master AND groupid = :groupid_master))';
-                        } else {
-                            // SBY — zwykły użytkownik lub admin bez grupy — tylko jego grupa
-                            $params['groupid_slave'] = $gid;
-                            //$params['groupid_master'] = $gid;
-                            $where = '((cid = :cid AND groupid = :groupid_slave) OR (cid = :include_master))';// AND groupid = :groupid_master))';
-                        }
-                        break;
-                        case VISIBLEGROUPS: //lokalnie visible groups zdalnie oddzielne grupy
-                            if ($hasallgroups && $groupid > 0) {
-                                $params['groupid_master'] = $groupid;
-                                $where = '((cid = :cid) OR (cid = :include_master AND groupid = :groupid_master))';
-                           } else {
-                                $params['groupid_master'] = $gid;
-                                $where = '((cid = :cid) OR (cid = :include_master AND groupid = :groupid_master))';
-                            }
-                        break;
-                        case NOGROUPS: //lokalnie nogroups zdalnie oddzielne grupy
-                            // W NOGROUPS nic nie zmieniamy
-                                $where = '((cid = :cid) OR (cid = :include_master))';
-                        break;
-                    } //switch
-                    
-                    break;
-            } //switch
-
-        } else { //if (($include_master == 0)) - LOKALNE REKORDY
-
-            switch ($groupmode) {
-                case SEPARATEGROUPS:
-                    if ($hasallgroups && $groupid > 0) {
-                        // SAY — admin wybrał grupę
-                        $params['groupid'] = $groupid;
-                        $where = '(cid = :cid AND groupid = :groupid)';
-                    } else if($hasallgroups && $groupid == 0) {
-                        $where = '((cid = :cid))';
-                    } else{
-                        // SBY — zwykły użytkownik lub admin bez grupy — tylko jego grupa
-                        $params['groupid'] = $gid;                       
-                        $where = '(cid = :cid AND groupid = :groupid)';
+            
+            $sql .= " UNION
+                     SELECT e.*, 
+                            u.username, u.email, u.firstname, u.lastname,
+                            CONCAT(u.firstname, ' ', u.lastname) as fullname
+                     FROM {valuemapdoc_entries} e
+                     JOIN {user} u ON u.id = e.userid
+                     WHERE e.cid = :mastercid AND e.ismaster = 1";
+            
+            $sql_params['mastercid'] = $mastercm->id;
+            
+            // Dodaj grupowanie dla master
+            if ($mastergroupmode == SEPARATEGROUPS && !$hasallgroups) {
+                if (!empty($usergroups[0])) {
+                    $sql .= " AND e.groupid IN ($grouplist)";
                 }
-                    break;
-                case VISIBLEGROUPS:
-                    if ($hasallgroups && $groupid > 0) {
-                        // VAY
-                        $params['groupid'] = $groupid;
-                        $where = '(cid = :cid AND groupid = :groupid)';
-                    } else {
-                        // VBY
-                        $params['groupid'] = $gid;
-                        $where = '(cid = :cid AND groupid = :groupid)';
-                    }
-                    break;
-                case NOGROUPS:
-                    // W NOGROUPS nic nie zmieniamy
-                    $where = '((cid = :cid))'; // OR (cid = :include_master))';
-                    break;
             }
-        
+        }
+
+        $sql .= " ORDER BY e.timemodified DESC";
+
+        $entries = $DB->get_records_sql($sql, $sql_params);
+
+        $result = [];
+        foreach ($entries as $entry) {
+            $result[] = [
+                'id' => (int)$entry->id,
+                'market' => $entry->market ?? '',
+                'industry' => $entry->industry ?? '',
+                'role' => $entry->role ?? '',
+                'businessgoal' => $entry->businessgoal ?? '',
+                'strategy' => $entry->strategy ?? '',
+                'difficulty' => $entry->difficulty ?? '',
+                'situation' => $entry->situation ?? '',
+                'statusquo' => $entry->statusquo ?? '',
+                'coi' => $entry->coi ?? '',
+                'differentiator' => $entry->differentiator ?? '',
+                'impact' => $entry->impact ?? '',
+                'newstate' => $entry->newstate ?? '',
+                'successmetric' => $entry->successmetric ?? '',
+                'impactstrategy' => $entry->impactstrategy ?? '',
+                'impactbusinessgoal' => $entry->impactbusinessgoal ?? '',
+                'impactothers' => $entry->impactothers ?? '',
+                'proof' => $entry->proof ?? '',
+                'time2results' => $entry->time2results ?? '',
+                'quote' => $entry->quote ?? '',
+                'clientname' => $entry->clientname ?? '',
+                'ismaster' => (int)($entry->ismaster ?? 0),
+                'groupid' => (int)($entry->groupid ?? 0),
+                'username' => $entry->username ?? 'unknown',
+                'email' => $entry->email ?? '',
+                'fullname' => $entry->fullname ?? ($entry->username ?? 'Unknown User'),
+            ];
         }
 /*
-
+        $result = [];
         $result[] = [
                 'id' => 1,
-                'market' => json_encode($params),
-                'industry' => $where,
-                'role' => '' . $gid,
-                'businessgoal' => '',
+                'market' => '',
+                'industry' =>  '',
+                'role' =>  '',
+                'businessgoal' =>  '',
                 'strategy' => '',
-                'difficulty' => '',
-                'situation' => '',
-                'statusquo' => '',
-                'coi' => '',
-                'differentiator' => '',
-                'impact' => '',
+                'difficulty' =>  '',
+                'situation' =>  '',
+                'statusquo' =>  '',
+                'coi' =>  '',
+                'differentiator' =>  '',
+                'impact' =>  '',
                 'newstate' => '',
-                'successmetric' => '',
+                'successmetric' =>  '',
                 'impactstrategy' => '',
-                'impactbusinessgoal' => '',
-                'impactothers' => '',
+                'impactbusinessgoal' =>  '',
+                'impactothers' =>  '',
                 'proof' => '',
-                'time2results' => '',
-                'quote' => '',
-                'clientname' => '',
-                'ismaster' => 0,
-                'groupid' => 2,
-            ];
-
-            return $result; 
-
-        $entries = $DB->get_records_select('valuemapdoc_entries', $where, $params);
-        $result = [];
+                'time2results' =>  '',
+                'quote' =>  '',
+                'clientname' =>  '',
+                'ismaster' => (int)(0),
+                'groupid' => (int)( 0),
+                'username' =>  'unknown',
+                'email' => '',
+                'fullname' =>  'Unknown User',
+        ];
 
 */
-
-        $sql = "SELECT ve.*, u.username, u.firstname, u.lastname, u.email
-        FROM {valuemapdoc_entries} ve 
-        LEFT JOIN {user} u ON ve.userid = u.id 
-        WHERE $where";
-
-        $entries = $DB->get_records_sql($sql, $params);
-
-        $result = [];
-
-        foreach ($entries as $entry) {
-
-/*            $userobj = (object)[
-                'firstname' => $entry->firstname,
-                'lastname' => $entry->lastname
-            ];
-
-            $displayname = fullname($userobj);
-*/
-            $result[] = [
-                'id' => $entry->id,
-                'market' => $entry->market,
-                'industry' => $entry->industry,
-                'role' => $entry->role,
-                'businessgoal' => $entry->businessgoal,
-                'strategy' => $entry->strategy,
-                'difficulty' => $entry->difficulty,
-                'situation' => $entry->situation,
-                'statusquo' => $entry->statusquo,
-                'coi' => $entry->coi,
-                'differentiator' => $entry->differentiator,
-                'impact' => $entry->impact,
-                'newstate' => $entry->newstate,
-                'successmetric' => $entry->successmetric,
-                'impactstrategy' => $entry->impactstrategy,
-                'impactbusinessgoal' => $entry->impactbusinessgoal,
-                'impactothers' => $entry->impactothers,
-                'proof' => $entry->proof,
-                'time2results' => $entry->time2results,
-                'quote' => $entry->quote,
-                'clientname' => $entry->clientname,
-                'ismaster' => $entry->ismaster,
-                'groupid' => $entry->groupid,
-
-                'username' => $entry->username ?? 'unknown',           // Rzeczywisty username
-                'email' => $entry->email ?? 'email',                        // Email osobno
-                'fullname' => $entry->username ?? 'fulname', //$displayname ?: ($entry->username ?? 'Unknown User'), // Sformatowane imię
-            ];
-
-
-
-        }
-
-
-
         return $result;
     }
+
+
 
     public static function execute_returns() {
         return new external_multiple_structure(

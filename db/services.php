@@ -17,6 +17,14 @@ $functions = [
         'ajax'        => true,
         'capabilities'=> 'mod/valuemapdoc:view',
     ],
+    'mod_valuemapdoc_delete_entry_bulk' => [
+        'classname'   => 'mod_valuemapdoc\external\delete_entry_bulk',
+        'methodname'  => 'execute',
+        'description' => 'Usuwa wiele wpisów z mapy wartości na podstawie ich ID.',
+        'type'        => 'write',
+        'ajax'        => true,
+        'capabilities'=> 'mod/valuemapdoc:manageentries',
+    ],
     'mod_valuemapdoc_get_master_instances' => [
         'classname'   => 'mod_valuemapdoc\external\get_master_instances',
         'methodname'  => 'execute',
@@ -42,7 +50,7 @@ $functions = [
         'ajax'        => true,
         'capabilities' => 'mod/valuemapdoc:view',
     ],
-    'mod_valuemapdoc_delete_entry' => [
+    'mod_valuemapdoc_delete_content' => [
         'classname'   => 'mod_valuemapdoc\external\delete_content',
         'methodname'  => 'execute',
         'classpath'   => '', // Moodle 4.x używa autoloadingu

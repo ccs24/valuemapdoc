@@ -31,7 +31,7 @@ $valuemapdoc = $DB->get_record('valuemapdoc', array('id' => $cm->instance), '*',
 // Security checks
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
-require_capability('mod/valuemapdoc:manage', $context);
+require_capability('mod/valuemapdoc:manageentries', $context); 
 
 // Set up page
 $PAGE->set_url('/mod/valuemapdoc/edit_bulk.php', array(
@@ -46,7 +46,7 @@ $PAGE->set_cm($cm, $course);
 // Get entries to be edited
 $entries = [];
 if (!empty($entryids_array)) {
-    list($insql, $inparams) = $DB->get_in_or_equal($entryids_array, SQL_PARAMS_NUMBERED);
+    list($insql, $inparams) = $DB->get_in_or_equal($entryids_array);//, SQL_PARAMS_NUMBERED);
     $sql = "SELECT * FROM {valuemapdoc_entries} WHERE id $insql AND cid = ?";
     $params = array_merge($inparams, [$cm->id]);
     $entries = $DB->get_records_sql($sql, $params);
@@ -61,7 +61,8 @@ $customdata = [
     'bulk_mode' => true,
     'entries_count' => count($entries),
     'entryids' => $entryids,
-    'cmid' => $cm->id
+    'cmid' => $cm->id,
+    'id' => $id
 ];
 
 $returnurl = new moodle_url('/mod/valuemapdoc/view.php', array('id' => $id));

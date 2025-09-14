@@ -23,7 +23,23 @@ define('mod_valuemapdoc/tabulatormap', [
 
             console.log('[tabulatormap] Module loaded');
             console.log('[tabulatormap] Course ID:', courseid, 'CM ID:', cmid, 'Filter CM ID:', filtercmid);
-            console.log('[tabulatormap] Columns:', columns);
+            console.log('[DEBUG] Columns received:', columns);
+
+            // Parse columns if string
+            if (typeof columns === 'string') {
+                try {
+                    columns = JSON.parse(columns);
+                    console.log('[DEBUG] Parsed columns:', columns);
+                } catch (e) {
+                    console.error('[tabulatormap] Error parsing columns:', e);
+                    return;
+                }
+            }
+
+            if (!Array.isArray(columns)) {
+                console.error('[tabulatormap] Columns is not an array');
+                return;
+            }
 
             var el = document.querySelector('#valuemap-table-js');
             if (!el) {
@@ -31,20 +47,11 @@ define('mod_valuemapdoc/tabulatormap', [
                 return;
             }
 
-            var jsonText = document.getElementById('valuemap-columns').textContent;
-            //var columns = JSON.parse(jsonText);
-
-
-           // var columns = JSON.parse(el.dataset.columns);
-
-
-          //  var courseid = el.dataset.courseid;
-          //  var cmid = el.dataset.cmid;
-          //  var filtercmid = el.dataset.filtercmid || '';
             var groupfilterEl = document.querySelector('#groupfilter');
-            var groupid = groupfilterEl ? groupfilterEl.value : 0;
-
+            var groupid = groupfilterEl ? parseInt(groupfilterEl.value) || 0 : 0;
             var fullscreenBtn = document.querySelector('#toggle-fullscreen');
+            var table; // Declare table variable
+
             if (fullscreenBtn) {
                 fullscreenBtn.addEventListener('click', function() {
                     document.body.classList.toggle('valuemapdoc-fullscreen');
@@ -71,7 +78,6 @@ define('mod_valuemapdoc/tabulatormap', [
                     return userEntry.username;
                 }
                 
-                // Fallback to global user info
                 return M.cfg.fullname || M.cfg.username || 'Ja';
             }
 
@@ -133,9 +139,9 @@ define('mod_valuemapdoc/tabulatormap', [
             Ajax.call([{
                 methodname: 'mod_valuemapdoc_get_entries',
                 args: {
-                    courseid: courseid,
-                    cmid: cmid,
-                    include_master: filtercmid,
+                    courseid: parseInt(courseid),
+                    cmid: parseInt(cmid),
+                    include_master: filtercmid ? parseInt(filtercmid) : 0,
                     groupid: groupid
                 },
             }])[0].done(function(response) {
@@ -143,7 +149,7 @@ define('mod_valuemapdoc/tabulatormap', [
 
                 var currentUsername = getUsernameFromResponse(response);
 
-                var table = new Tabulator(el, {
+                table = new Tabulator(el, {
                     data: response,
                     columns: enhancedColumns,
                     layout: "fitDataTable",
@@ -162,8 +168,80 @@ define('mod_valuemapdoc/tabulatormap', [
                     selectable: true,
                 });
 
-                // Set default filter to show only current user's entries
-                table.setHeaderFilterValue("username", currentUsername);
+                /**
+                 * Function to reload table data from server
+                 */
+                function reloadTableData() {
+                    Ajax.call([{
+                        methodname: 'mod_valuemapdoc_get_entries',
+                        args: {
+                            courseid: parseInt(courseid),
+                            cmid: parseInt(cmid),
+                            include_master: filtercmid ? parseInt(filtercmid) : 0,
+                            groupid: groupid
+                        },
+                    }])[0].done(function(response) {
+                        console.log('[tabulatormap] Table data reloaded');
+                        table.setData(response);
+                    }).fail(function(error) {
+                        console.error('[tabulatormap] Error reloading data:', error);
+                    });
+                }
+
+                // Wait for table to build before setup
+                table.on("tableBuilt", function(){
+                    console.log('[tabulatormap] Table built successfully');
+                    
+                    // Set default filter to show only current user's entries
+                    table.setHeaderFilterValue("username", currentUsername);
+                    
+                    // Add user filter toggle
+                    addUserFilterToggle(table, currentUsername);
+                });
+
+                // Selection change handler - show/hide bulk actions
+                table.on("rowSelectionChanged", function(data, rows){
+                    var bulkActions = document.querySelector('#bulk-actions');
+                    if (bulkActions) {
+                        if (data.length > 0) {
+                            bulkActions.style.display = 'block';
+                        } else {
+                            bulkActions.style.display = 'none';
+                        }
+                    }
+                });
+
+                // Handle cell editing
+                table.on("cellEdited", function(cell){
+                    var updatedData = cell.getRow().getData();
+
+                    Ajax.call([{
+                        methodname: 'mod_valuemapdoc_update_cell',
+                        args: {
+                            id: updatedData.id,
+                            field: cell.getField(),
+                            value: cell.getValue()
+                        }
+                    }])[0].done(function(response) {
+                        console.log('[tabulatormap] Cell updated successfully');
+                        // Optional: reload table data to ensure sync with database
+                        // reloadTableData();
+                    }).fail(function(error) {
+                        console.error('[tabulatormap] Error updating cell:', error);
+                        alert('Nie udało się zapisać zmian.');
+                        // Revert cell value on error
+                        cell.restoreOldValue();
+                    });
+                });
+
+                // Handle double-click to open edit form
+                table.on("rowDblClick", function(e, row){
+                    var data = row.getData();
+                    if (data.ismaster === 1) {
+                        var rateUrl = M.cfg.wwwroot + '/mod/valuemapdoc/edit.php?id=' + cmid + '&entryid=' + data.id;
+                        window.open(rateUrl);
+                    }
+                });
 
                 /**
                  * Add user filter toggle button
@@ -206,36 +284,6 @@ define('mod_valuemapdoc/tabulatormap', [
                     toolbar.appendChild(filterContainer);
                 }
 
-                addUserFilterToggle(table, currentUsername);
-
-                // Handle cell editing
-                table.on("cellEdited", function(cell){
-                    var updatedData = cell.getRow().getData();
-
-                    Ajax.call([{
-                        methodname: 'mod_valuemapdoc_update_cell',
-                        args: {
-                            id: updatedData.id,
-                            field: cell.getField(),
-                            value: cell.getValue()
-                        }
-                    }])[0].done(function(response) {
-                        console.log('[tabulatormap] Cell updated successfully');
-                    }).fail(function(error) {
-                        console.error('[tabulatormap] Error updating cell:', error);
-                        alert('Nie udało się zapisać zmian.');
-                    });
-                });
-
-                // Handle double-click to open edit form
-                table.on("rowDblClick", function(e, row){
-                    var data = row.getData();
-                    if (data.ismaster === 1) {
-                        var rateUrl = M.cfg.wwwroot + '/mod/valuemapdoc/edit.php?id=' + cmid + '&entryid=' + data.id;
-                        window.open(rateUrl);
-                    }
-                });
-
                 // Global search functionality
                 var searchInput = document.querySelector('#valuemap-search');
                 if (searchInput) {
@@ -251,67 +299,13 @@ define('mod_valuemapdoc/tabulatormap', [
                     });
                 }
 
-                // Generate button functionality
-                var generateButton = document.querySelector('#generate-button');
-                if (generateButton) {
-                    generateButton.addEventListener('click', function() {
-                        var selectedData = table.getSelectedData();
-                        if (!selectedData.length) {
-                            alert('Proszę zaznaczyć co najmniej jeden rekord.');
-                            return;
-                        }
-
-                        var templateSelect = document.querySelector('#templateid');
-                        if (!templateSelect || !templateSelect.value) {
-                            alert('Wybierz szablon przed generowaniem dokumentu.');
-                            return;
-                        }
-
-                        var form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = generateButton.dataset.action || 'generate.php';
-
-                        var idInput = document.createElement('input');
-                        idInput.type = 'hidden';
-                        idInput.name = 'id';
-                        idInput.value = cmid;
-                        form.appendChild(idInput);
-
-                        var templateInput = document.createElement('input');
-                        templateInput.type = 'hidden';
-                        templateInput.name = 'templateid';
-                        templateInput.value = templateSelect.value;
-                        form.appendChild(templateInput);
-
-                        selectedData.forEach(function(entry) {
-                            var input = document.createElement('input');
-                            input.type = 'hidden';
-                            input.name = 'entryids[]';
-                            input.value = entry.id;
-                            form.appendChild(input);
-                        });
-
-                        var filenameprefix = document.getElementById('filenameprefix');
-                        if (filenameprefix && filenameprefix.value) {
-                            var input = document.createElement('input');
-                            input.type = 'hidden';
-                            input.name = 'filenameprefix';
-                            input.value = filenameprefix.value;
-                            form.appendChild(input);
-                        }
-
-                        document.body.appendChild(form);
-                        form.submit();
-                    });
-                }
-
-                // Bulk edit button functionality
+                // Edit button functionality
                 var editBulkButton = document.querySelector('#edit-bulk-button');
                 if (editBulkButton) {
                     editBulkButton.addEventListener('click', function() {
                         var selectedData = table.getSelectedData();
                         if (!selectedData.length) {
-                            alert('Zaznacz rekordy do edycji.');
+                            alert('Proszę zaznaczyć co najmniej jeden rekord.');
                             return;
                         }
 
@@ -347,15 +341,16 @@ define('mod_valuemapdoc/tabulatormap', [
                             return entry.id;
                         });
                         Ajax.call([{
-                            methodname: 'mod_valuemapdoc_duplicate_entries',
+                            methodname: 'mod_valuemapdoc_create_entries_bulk',
                             args: {
                                 entryids: entryids,
                                 cmid: cmid
                             }
                         }])[0].done(function(response) {
-                            response.forEach(function(newEntry) {
-                                table.updateOrAddData([newEntry]);
-                            });
+                            console.log('[tabulatormap] Entries duplicated successfully');
+                            
+                            // Refresh table data from database
+                            reloadTableData();
                             table.deselectRow();
                         }).fail(function(error) {
                             console.error('[tabulatormap] Error duplicating entries:', error);
@@ -364,46 +359,23 @@ define('mod_valuemapdoc/tabulatormap', [
                     });
                 }
 
-                // Empty button functionality  
+                // Add empty line functionality  
                 var emptyBulkButton = document.querySelector('#empty-bulk-button');
                 if (emptyBulkButton) {
                     emptyBulkButton.addEventListener('click', function() {
-                        var selectedData = table.getSelectedData();
-                        if (!selectedData.length) {
-                            var selector = document.querySelector('#bulk-actions');
-                            var button = selector ? selector.querySelector('button') : null;
-                            if (button) {
-                                button.disabled = true;
-                                setTimeout(function() {
-                                    button.removeAttribute('disabled');
-                                }, 3000);
-                            }
-                            if (selector) {
-                                selector.classList.add('animate');
-                                setTimeout(function() {
-                                    selector.classList.remove('animate');
-                                }, 1000);
-                            }
-                            return;
-                        }
-
-                        var entryids = selectedData.map(function(entry) {
-                            return entry.id;
-                        });
                         Ajax.call([{
-                            methodname: 'mod_valuemapdoc_empty_entries',  
+                            methodname: 'mod_valuemapdoc_create_entries_bulk',
                             args: {
-                                entryids: entryids,
+                                entryids: [], // Empty array for new entry
                                 cmid: cmid
                             }
                         }])[0].done(function(response) {
-                            response.forEach(function(updatedEntry) {
-                                table.updateOrAddData([updatedEntry]);
-                            });
+                            console.log('[tabulatormap] Empty entry created');
+                            reloadTableData();
                             table.deselectRow();
                         }).fail(function(error) {
-                            console.error('[tabulatormap] Error emptying entries:', error);
-                            alert('Nie udało się wyczyścić wpisów.');
+                            console.error('[tabulatormap] Error creating empty entries:', error);
+                            alert('Nie udało się utworzyć pustego wpisu.');
                         });
                     });
                 }
@@ -418,14 +390,6 @@ define('mod_valuemapdoc/tabulatormap', [
                             return;
                         }
 
-                        var filteredData = selectedData.filter(function(entry) {
-                            return !entry.blocked;
-                        });
-                        if (filteredData.length !== selectedData.length) {
-                            alert('Niektóre wpisy nie mogą być usunięte.');
-                            return;
-                        }
-
                         if (!confirm('Czy na pewno chcesz usunąć zaznaczone wpisy?')) {
                             return;
                         }
@@ -434,15 +398,14 @@ define('mod_valuemapdoc/tabulatormap', [
                             return entry.id;
                         });
                         Ajax.call([{
-                            methodname: 'mod_valuemapdoc_delete_entries',
+                            methodname: 'mod_valuemapdoc_delete_bulk',
                             args: {
                                 entryids: entryids,
                                 cmid: cmid
                             }
                         }])[0].done(function(response) {
-                            entryids.forEach(function(id) {
-                                table.deleteRow(id);
-                            });
+                            console.log('[tabulatormap] Entries deleted successfully');
+                            reloadTableData();
                         }).fail(function(error) {
                             console.error('[tabulatormap] Error deleting entries:', error);
                             alert('Nie udało się usunąć wpisów.');
@@ -450,129 +413,52 @@ define('mod_valuemapdoc/tabulatormap', [
                     });
                 }
 
-                // Move to master button functionality
-                var moveBulkButton = document.querySelector('#move-bulk-button');
-                if (moveBulkButton) {
-                    moveBulkButton.addEventListener('click', function() {
+                // Generate button functionality
+                var generateButton = document.querySelector('#generate-button');
+                if (generateButton) {
+                    generateButton.addEventListener('click', function() {
                         var selectedData = table.getSelectedData();
                         if (!selectedData.length) {
-                            alert('Zaznacz rekordy do przeniesienia.');
+                            alert('Proszę zaznaczyć co najmniej jeden rekord.');
                             return;
                         }
 
-                        Ajax.call([{
-                            methodname: 'mod_valuemapdoc_get_master_instances',
-                            args: {
-                                courseid: courseid
-                            }
-                        }])[0].done(function(instances) {
-                            if (!instances.length) {
-                                alert('Brak dostępnych instancji master.');
-                                return;
-                            }
+                        var templateSelect = document.querySelector('#templateid');
+                        if (!templateSelect || !templateSelect.value) {
+                            alert('Wybierz szablon przed generowaniem dokumentu.');
+                            return;
+                        }
 
-                            var targetcmid;
-                            if (instances.length === 1) {
-                                targetcmid = instances[0].cmid;
-                            } else {
-                                // Show selection dialog for multiple instances
-                                // Implementation would go here
-                                return;
-                            }
-
-                            var entryids = selectedData.map(function(entry) {
-                                return entry.id;
-                            });
-                            Ajax.call([{
-                                methodname: 'mod_valuemapdoc_move_entries_to_master',
-                                args: {
-                                    entryids: entryids,
-                                    targetcmid: targetcmid
-                                }
-                            }])[0].done(function(response) {
-                                entryids.forEach(function(id) {
-                                    table.deleteRow(id);
-                                });
-                            }).fail(function(error) {
-                                console.error('[tabulatormap] Error moving entries:', error);
-                                alert('Nie udało się przenieść wpisów.');
-                            });
+                        var entryIds = selectedData.map(function(entry) {
+                            return entry.id;
                         });
-                    });
-                }
 
-                // Group filter functionality
-                var groupFilter = document.querySelector('#groupfilter');
-                if (groupFilter) {
-                    groupFilter.addEventListener('change', function() {
-                        var selectedGroupId = this.value;
-                        var masterFilterEl = document.querySelector('#masterfilter');
-                        var currentFilterCmid = masterFilterEl ? masterFilterEl.value : '';
-                        var currentUsernameFilter = table.getHeaderFilterValue('username') || '';
-
-                        Ajax.call([{
-                            methodname: 'mod_valuemapdoc_get_entries',
-                            args: {
-                                courseid: parseInt(courseid),
-                                cmid: parseInt(cmid),
-                                include_master: currentFilterCmid,
-                                groupid: parseInt(selectedGroupId)
-                            }
-                        }])[0].done(function(newResponse) {
-                            table.setData(newResponse);
-                            if (currentUsernameFilter) {
-                                table.setHeaderFilterValue('username', currentUsernameFilter);
-                            }
-                        }).catch(function(error) {
-                            console.error('[tabulatormap] Error loading group data:', error);
-                        });
-                    });
-                }
-
-                // Master filter functionality
-                var masterFilter = document.querySelector('#masterfilter');
-                if (masterFilter) {
-                    masterFilter.addEventListener('change', function() {
-                        var newFilterCmid = this.value;
+                        var form = document.createElement('form');
+                        form.method = 'post';
+                        form.action = M.cfg.wwwroot + '/mod/valuemapdoc/generate.php';
                         
-                        // Save user preference for master filter
-                        Ajax.call([{
-                            methodname: 'core_user_set_user_preferences',
-                            args: {
-                                preferences: [{
-                                    name: 'mod_valuemapdoc_master_filter',
-                                    value: newFilterCmid
-                                }]
-                            }
-                        }]).then(function() {
-                            // Reload page with new filter
-                            var url = new URL(window.location);
-                            if (newFilterCmid) {
-                                url.searchParams.set('filtercmid', newFilterCmid);
-                            } else {
-                                url.searchParams.delete('filtercmid');
-                            }
-                            window.location.href = url.toString();
-                        }).catch(function(error) {
-                            console.error('[tabulatormap] Error saving filter preference:', error);
-                            // Still reload even if preference saving failed
-                            var url = new URL(window.location);
-                            if (newFilterCmid) {
-                                url.searchParams.set('filtercmid', newFilterCmid);
-                            } else {
-                                url.searchParams.delete('filtercmid');
-                            }
-                            window.location.href = url.toString();
-                        });
+                        var inputs = {
+                            'id': cmid,
+                            'templateid': templateSelect.value,
+                            'entryids': entryIds
+                        };
+
+                        for (var name in inputs) {
+                            var input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = name;
+                            input.value = Array.isArray(inputs[name]) ? inputs[name].join(',') : inputs[name];
+                            form.appendChild(input);
+                        }
+
+                        document.body.appendChild(form);
+                        form.submit();
                     });
                 }
-
-                // Redraw table after initialization
-                table.redraw();
 
             }).fail(function(error) {
                 console.error('[tabulatormap] Error loading entries:', error);
-                alert('Nie udało się załadować danych.');
+                alert('Błąd podczas ładowania danych: ' + (error.message || 'Nieznany błąd'));
             });
         }
     };

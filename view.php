@@ -33,6 +33,7 @@ $PAGE->set_title(format_string($valuemapdoc->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($context);
 
+
 // Get user's field level and filter columns accordingly
 $user_fields = field_levels::get_user_fields();
 $user_level_config = field_levels::get_user_level_config();
@@ -52,7 +53,8 @@ $all_columns = [
 ];
 
 // Filter columns based on user's level
-$columns = array_intersect($all_columns, $user_fields);
+//$columns = array_intersect($all_columns, $user_fields);
+$columns = array_values(array_intersect($all_columns, $user_fields));
 
 // Handle readonly mode
 $readonly_forced = !has_capability('mod/valuemapdoc:manageentries', $context);
@@ -216,16 +218,29 @@ $tablecontent = [
     ]
 ];
 
-//var_dump($tablecontent);    
+
+//$columnsjson
+//var_dump($columnsjson);    
 //die();
 
+//$columns_for_js = array_values($columns);
+
+
 $renderer = $PAGE->get_renderer('mod_valuemapdoc');
+
+//$PAGE->requires->js_call_amd('mod_valuemapdoc/tabs', 'init');
+
+$PAGE->requires->css(new moodle_url('/mod/valuemapdoc/styles/tabulator.min.css'));
+$PAGE->requires->js(new moodle_url('/mod/valuemapdoc/scripts/tabulator.min.js'),true); // <-- TO JEST KLUCZOWE
+
+
 $PAGE->requires->js_call_amd('mod_valuemapdoc/tabulatormap', 'init', [
     'courseid' => $course->id,
     'cmid' => $cm->id,
     'filtercmid' => $selectedfilter,
-    'columns' => $columns
+    'columns' => $columnsjson //$columns_for_js
 ]);
+
 
 echo $OUTPUT->header();
 echo $renderer->render_from_template('mod_valuemapdoc/view', $tablecontent);
