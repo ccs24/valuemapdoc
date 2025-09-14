@@ -424,6 +424,9 @@ define('mod_valuemapdoc/tabulatormap', [
                         }
 
                         var templateSelect = document.querySelector('#templateid');
+//                        console.log('[DEBUG] templateSelect element:', templateSelect);
+//                        console.log('[DEBUG] templateSelect value:', templateSelect ? templateSelect.value : 'element not found');
+                    
                         if (!templateSelect || !templateSelect.value) {
                             alert('Wybierz szablon przed generowaniem dokumentu.');
                             return;

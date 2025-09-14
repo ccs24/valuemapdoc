@@ -138,7 +138,12 @@ $templateselect = [];
 $grouped_templates = [];
 
 foreach ($templates as $template) {
-    $templateselect[$template->id] = $template->templatetype . ': ' . $template->name;
+    $templateselect[] = [
+        'id' => $template->id,
+        'name' => $template->name
+    ];
+    
+//    $templateselect[$template->id] = $template->templatetype . ': ' . $template->name;
     $grouped_templates[$template->templatetype][] = $template;
 }
 
@@ -153,6 +158,8 @@ $columnsjson = json_encode(array_map(function($c) {
     }, $columns), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 
 
+//    var_dump($templateselect);
+//    die();
 
 // Prepare data for template
 $tablecontent = [
@@ -181,7 +188,7 @@ $tablecontent = [
         'filtercmid' => $selectedfilter
     ],
     'documents' => [], // processed content entries
-    'tempselect' => array_values($templateselect),
+    'tempselect' => ($templateselect),
     'templates' => array_values($grouped_templates),
     'bulk_edit_url' => new moodle_url('/mod/valuemapdoc/edit_bulk.php', ['id' => $id]),
     'hasaccessallgroups' => $haaccessallgroups,

@@ -92,6 +92,9 @@ class valuemapdoc_entry_form extends moodleform {
         // Hidden fields
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
+        if (isset($customdata['id'])) {
+            $mform->setDefault('id', $customdata['id']);
+        }
 
         $mform->addElement('hidden', 'instance');
         $mform->setType('instance', PARAM_INT);
@@ -130,13 +133,15 @@ class valuemapdoc_entry_form extends moodleform {
             $buttonarray[] = $mform->createElement('submit', 'submitbutton', 
                 get_string('update_selected_entries', 'mod_valuemapdoc'), 
                 ['class' => 'btn btn-primary']);
+            $buttonarray[] = $mform->createElement('cancel');
         } else {
             // Normal mode buttons
             $buttonarray[] = $mform->createElement('submit', 'submitbutton', get_string('savechanges'), $saveattrs);
             $buttonarray[] = $mform->createElement('submit', 'saveasnew', get_string('saveasnew', 'mod_valuemapdoc'));
+            $buttonarray[] = $mform->createElement('cancel');
         }
         
-        $buttonarray[] = $mform->createElement('cancel');
+        
 
         $mform->addGroup($buttonarray, 'buttonar', '', [' '], false);
         $mform->closeHeaderBefore('buttonar');

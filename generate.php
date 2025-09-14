@@ -9,7 +9,6 @@ if (empty($templateid)) {
     throw new \moodle_exception('missingtemplate', 'mod_valuemapdoc');
 }
 
-
 $marketid  = optional_param('marketid', 0, PARAM_INT);
 $customerid  = optional_param('customerid', 0, PARAM_INT);
 $personid  = optional_param('personid', 0, PARAM_INT);
@@ -18,10 +17,26 @@ $opportunityid  = optional_param('opportunityid', 0, PARAM_INT);
 $filenameprefix = optional_param('filenameprefix', '', PARAM_TEXT);
 
 
+$entryids_string = optional_param('entryids', "", PARAM_TEXT);
 
+$selectedentries = [];
+    if (!empty($entryids_string)) {
+        $selectedentries = array_filter(
+        array_map('intval', explode(',', $entryids_string)),
+        function($id) { return $id > 0; }  // Usuń nieprawidłowe ID
+        );
+    }
+
+/*
 $selectedentries = optional_param_array('entryids', null, PARAM_INT);
 if ($selectedentries === null) {
-    $selectedentries = optional_param_array('entries', [], PARAM_INT);
+    $selectedentries = optional_param_array('entries', null, PARAM_INT);
+}
+*/
+
+if (empty($selectedentries)) {
+    echo $entryids_string;
+    throw new moodle_exception('noentries', 'valuemapdoc');
 }
 
 $cm = get_coursemodule_from_id('valuemapdoc', $id, 0, false, MUST_EXIST);

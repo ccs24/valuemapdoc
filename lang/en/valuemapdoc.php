@@ -518,6 +518,7 @@ $string['noentriesfound'] = 'No entries found for editing.';
 // Template view additions
 $string['field_level_info'] = 'Field Level: {$a->level_name} ({$a->fields_count} fields)';
 $string['change_field_level'] = 'Change Field Level';
+$string['add_empty_line'] = 'Add Empty Line';
 
 
 // Bulk edit specific strings
@@ -546,7 +547,6 @@ $string['readonly_mode'] = 'Read-only Mode';
 $string['readonly_mode_help'] = 'When enabled, you can only view entries without editing them.';
 
 // Navigation strings
-$string['back_to_view'] = 'Back to View';
 $string['back_to_activity'] = 'Back to Activity';
 
 $string['allgroups'] = 'All groups'; 

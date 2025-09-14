@@ -149,11 +149,5 @@ echo html_writer::div($level_info, 'alert alert-info');
 // Display form
 $form->display();
 
-// Back link
-echo html_writer::div(
-    html_writer::link($returnurl, get_string('back_to_view', 'mod_valuemapdoc'), 
-                     ['class' => 'btn btn-secondary']),
-    'text-center mt-3'
-);
 
 echo $OUTPUT->footer();
