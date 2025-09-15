@@ -37,6 +37,13 @@ $templatetab = new moodle_url('/mod/valuemapdoc/view.php', ['id' => $id],'templa
 echo html_writer::start_div('container mt-3',
     ['id' => 'valuemapdoc-tabs-container']);
 
+echo html_writer::start_div('row');
+echo html_writer::start_div('col');
+
+
+echo '<a href="' . $valuemaptab . '" class="btn btn-sm btn-outline-secondary me-1">Value Map</a>';
+
+/*
 echo "
 <ul class='nav nav-tabs' role='tablist'>
   <li class='nav-item' role='presentation'>
@@ -52,12 +59,13 @@ echo '
   </li>
 </ul>
 ';
-
-echo html_writer::start_div('row');
-echo html_writer::start_div('col');
+*/
+//echo html_writer::start_div('row');
+//echo html_writer::start_div('col');
 
 // Przycisk wróc do generatora
 //echo $OUTPUT->single_button($url, get_string('backtogenerator', 'mod_valuemapdoc'), 'get');
+echo html_writer::end_div();
 echo html_writer::end_div();
 
 /*
@@ -85,6 +93,7 @@ echo html_writer::end_div();
 echo html_writer::start_div('col');
 echo html_writer::start_div('', ['style' => 'margin-bottom: 1rem']);
 //    echo html_writer::label(get_string('search'), 'valuemap-search');
+/*
 echo html_writer::empty_tag('input', [
  'type' => 'text',
  'id' => 'valuemap-search',
@@ -92,6 +101,7 @@ echo html_writer::empty_tag('input', [
  'class' => 'form-control',
  'style' => 'max-width: 300px;'
 ]);
+*/
 
 echo html_writer::end_div();
 echo html_writer::end_div();
@@ -104,6 +114,17 @@ echo '<button id="toggle-fullscreen" class="btn btn-secondary">🔳 Pełny ekran
 echo html_writer::end_div();
 echo html_writer::end_div();
 */
+
+echo '
+      <button id="refresh-documents-btn" 
+              class="btn btn-outline-primary btn-sm"
+              type="button"
+              title="' . get_string("refresh", "core") . '"
+              >
+              <i class="fa fa-refresh"></i>
+              <span class="btn-text d-none d-sm-inline ms-1"> ' . get_string("refresh", "core") . ' </span>
+              </button>';
+              
 
 echo html_writer::end_div();
 

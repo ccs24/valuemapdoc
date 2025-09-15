@@ -36,19 +36,19 @@ class rate_content_form extends moodleform {
         
         // Grupa przycisków eksportu - Bootstrap 4
         $mform->addElement('submit', 'savefile', get_string('saveasfile', 'mod_valuemapdoc'), [
-            'class' => 'btn btn-primary btn-sm btn-block mb-2'
+            'class' => 'btn btn-primary btn-sm mb-2'
         ]);
         $mform->addElement('submit', 'sendmail', get_string('sendbymail', 'mod_valuemapdoc'), [
-            'class' => 'btn btn-success btn-sm btn-block mb-2'
+            'class' => 'btn btn-success btn-sm mb-2'
         ]);
         $mform->addElement('button', 'copytoclipboard', get_string('copytoclipboard', 'mod_valuemapdoc'), [
             'type' => 'button',
-            'class' => 'btn btn-secondary  btn-block mb-2',
+            'class' => 'btn btn-secondary  btn-sm mb-2',
             'id' => 'id_copytoclipboard',
         ]);
                 // Przycisk powrotu
         $mform->addElement('cancel', '', get_string('back'), [
-            'class' => 'btn btn-secondary btn-sm btn-block mb-2'
+            'class' => 'btn btn-secondary btn-sm  mb-2'
         ]);
         
 

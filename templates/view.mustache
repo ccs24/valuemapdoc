@@ -6,240 +6,117 @@
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 }}
-{{!
-    @template mod_valuemapdoc/view
-
-    Value Map Doc view template with field level support.
-
-    Context variables required for this template:
-    * field_level - Field level configuration
-    * ... (other existing context variables)
-}}
-
 <div class="valuemapdoc-view">
-    <!-- Field Level Information Bar -->
-    {{#field_level}}
-    <div class="field-level-info bg-light p-3 mb-3 border-left border-info">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h6 class="mb-1">
-                    <i class="fa fa-layer-group text-info"></i>
-                    {{#str}}field_level_info, mod_valuemapdoc, {
-                        "level_name": "{{{level_name}}}",
-                        "fields_count": "{{{fields_count}}}"
-                    }{{/str}}
-                </h6>
-                <small class="text-muted">
-                    {{#str}}preferences_explanation, mod_valuemapdoc{{/str}}
-                </small>
-            </div>
-            <div class="col-md-4 text-right">
-                <a href="{{{preferences_url}}}" class="btn btn-outline-info btn-sm">
-                    <i class="fa fa-cog"></i> {{#str}}change_field_level, mod_valuemapdoc{{/str}}
-                </a>
-            </div>
-        </div>
-    </div>
-    {{/field_level}}
 
-    <!-- Existing content starts here -->
-    {{#has_intro}}
-    <div class="valuemapdoc-intro mb-4">
-        {{{intro}}}
-    </div>
-    {{/has_intro}}
-
-    <!-- Toolbar -->
-    <div class="btn-toolbar mb-3" role="toolbar">
-        <div class="btn-group mr-2" role="group">
-            {{#can_add}}
-            <a href="{{{add_url}}}" class="btn btn-primary">
-                <i class="fa fa-plus"></i> {{#str}}addentry, mod_valuemapdoc{{/str}}
-            </a>
-            {{/can_add}}
-            
-            {{#readonly}}
-            <span class="btn btn-secondary disabled">
-                <i class="fa fa-lock"></i> {{#str}}readonly_mode, mod_valuemapdoc{{/str}}
-            </span>
-            {{/readonly}}
-        </div>
-
-        <!-- Master Filter -->
-        {{#masteroptions}}
-        <div class="btn-group mr-2" role="group">
-            <select id="masterfilter" class="form-control form-control-sm {{classmaster}}">
-                {{#masteroptions}}
-                <option value="{{key}}" {{#selected}}selected{{/selected}}>{{label}}</option>
-                {{/masteroptions}}
-            </select>
-        </div>
-        {{/masteroptions}}
-
+    <!-- COMPACT TOOLBAR -->
+    <div class="valuemapdoc-toolbar border-bottom pb-2 mb-3">
         
-
-        <!-- Group Filter -->
-        {{#groupoptions}}
-        <div class="btn-group mr-2" role="group">
-            <select id="groupfilter" class="form-control form-control-sm">
+        <!-- Row 1: Zarządzanie -->
+        <div class="toolbar-row d-flex align-items-center py-1">
+            <span class="toolbar-label">Zarządzanie:</span>
+            
+            {{#groupoptions}}
+            <select id="groupfilter" class="form-select form-select-sm me-2" style="width: auto;">
                 {{#groupoptions}}
                 <option value="{{@key}}">{{.}}</option>
                 {{/groupoptions}}
             </select>
-        </div>
-        {{/groupoptions}}
-
-        <!-- Additional toolbar items will be added by JavaScript -->
-    </div>
-
-    <!-- Search -->
-    <div class="mb-3">
-        <div class="input-group">
-            <div class="input-group-prepend">
-                <span class="input-group-text">
-                    <i class="fa fa-search"></i>
-                </span>
-            </div>
-            <input type="text" id="valuemap-search" class="form-control" 
-                   placeholder="{{#str}}search_entries, mod_valuemapdoc{{/str}}">
-        </div>
-    </div>
-
-    <!-- Bulk Actions -->
-    <div id="bulk-actions" class="bulk-actions mb-3" style="display: none;">
-        <div class="btn-group" role="group">
-            {{#can_edit}}
-            <button id="edit-bulk-button" class="btn btn-outline-primary btn-sm">
-                <i class="fa fa-edit"></i> {{#str}}edit_selected, mod_valuemapdoc{{/str}}
-            </button>
-            {{/can_edit}}
+            {{/groupoptions}}
             
-            <button id="duplicate-bulk-button" class="btn btn-outline-secondary btn-sm">
-                <i class="fa fa-copy"></i> {{#str}}duplicate_selected, mod_valuemapdoc{{/str}}
-            </button>
+            <a href="{{{import_url}}}" class="btn btn-sm btn-outline-secondary me-1">Import</a>
+            <a href="{{{export_url}}}" class="btn btn-sm btn-outline-secondary me-1">Export</a>
+            <a href="{{{preferences_url}}}" class="btn btn-outline-info btn-sm">
+                    <i class="fa fa-cog"></i> {{#str}}change_field_level, mod_valuemapdoc{{/str}}
+                </a>
+        </div>
+        <!-- Row 2: Dokumenty -->
+        {{#can_generate}}
+        <div class="toolbar-row d-flex align-items-center py-1">
+            <span class="toolbar-label">Dokumenty:</span>
             
-            {{#can_delete}}
-            <button id="delete-bulk-button" class="btn btn-outline-danger btn-sm">
-                <i class="fa fa-trash"></i> {{#str}}delete_selected, mod_valuemapdoc{{/str}}
+            <select id="templateid" class="form-select form-select-sm me-2" style="width: 200px;">
+                <option value="">Wybierz szablon</option>
+                {{#tempselect}}
+                <option value="{{id}}">{{name}}</option>
+                {{/tempselect}}
+            </select>
+            
+            <input type="text" id="filenameprefix" class="form-control form-control-sm me-2" 
+                   style="width: 120px;" placeholder="Prefix">
+            
+            <button id="generate-button" class="btn btn-sm btn-success me-2" disabled>
+                Generuj
             </button>
-            {{/can_delete}}
+
+            <a href="{{{content_url}}}" class="btn btn-sm btn-outline-secondary me-1">Content</a>
+
+        </div>
+        {{/can_generate}}
+
+        <!-- Row 3: Master (only if not master instance) -->
+        {{^is_master_instance}}
+        <div class="toolbar-row d-flex align-items-center py-1">
+            <span class="toolbar-label">Master:</span>
+            
+            <select id="masterfilter" class="form-select form-select-sm me-2 {{classmaster}}" style="width: 250px;">
+                <option value="">Wybierz bazę master</option>
+                {{#masteroptions}}
+                <option value="{{key}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                {{/masteroptions}}
+            </select>
+            
+            <button id="move-to-master-button" class="btn btn-sm btn-warning me-2" disabled>
+                Przekaż do Master
+            </button>
+        </div>
+        {{/is_master_instance}}
+
+        <!-- Row 4: Tabela -->
+        <div class="toolbar-row d-flex align-items-center justify-content-between py-1">
+            <div class="d-flex align-items-center">
+                <span class="toolbar-label">Tabela:</span>
+                
+                {{#can_add}}
+                <a href="{{{add_url}}}" class="btn btn-sm btn-success me-1">+ Nowy rekord</a>
+                {{/can_add}}
+                
+                <button id="empty-bulk-button" class="btn btn-sm btn-outline-success me-1">+ Empty Line</button>
+                
+                <!-- Bulk actions (shown when rows selected) -->
+                <div id="bulk-actions" style="display: none;">
+                    {{#can_edit}}
+                    <button id="edit-bulk-button" class="btn btn-sm btn-primary me-1">Edit Selected</button>
+                    {{/can_edit}}
+                    <button id="duplicate-bulk-button" class="btn btn-sm btn-outline-primary me-1">Duplicate</button>
+                    {{#can_delete}}
+                    <button id="delete-bulk-button" class="btn btn-sm btn-danger me-1">Delete</button>
+                    {{/can_delete}}
+                </div>
+            </div>
+            
+            <div class="d-flex align-items-center">
+                <input type="text" id="valuemap-search" class="form-control form-control-sm me-2" 
+                       style="width: 150px;" placeholder="Szukaj">
+                <button id="toggle-fullscreen" class="btn btn-sm btn-outline-secondary">Full Screen</button>
+            </div>
         </div>
     </div>
-    <!-- Add Empty Line Button (always visible) -->
-<div class="mb-3">
-    <button id="empty-bulk-button" class="btn btn-success btn-sm">
-        <i class="fa fa-plus"></i> {{#str}}add_empty_line, mod_valuemapdoc{{/str}}
-    </button>
-</div>
 
-    <!-- Generation Section -->
-    {{#can_generate}}
-    <div class="generation-section mb-4 p-3 bg-light border">
-        <h5>{{#str}}generate_document, mod_valuemapdoc{{/str}}</h5>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="templateid">{{#str}}select_template, mod_valuemapdoc{{/str}}</label>
-                    <select id="templateid" class="form-control">
-                        <option value="">{{#str}}choose_template, mod_valuemapdoc{{/str}}</option>
-                        {{#tempselect}}
-                        <option value="{{id}}">{{name}}</option>
-                        {{/tempselect}}
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                    <label for="filenameprefix">{{#str}}filename_prefix, mod_valuemapdoc{{/str}}</label>
-                    <input type="text" id="filenameprefix" class="form-control" 
-                           placeholder="{{#str}}optional, mod_valuemapdoc{{/str}}">
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="form-group">
-                    <label>&nbsp;</label>
-                    <button id="generate-button" class="btn btn-success btn-block" 
-                            data-action="{{{generate_url}}}">
-                        <i class="fa fa-file-text"></i> {{#str}}generate, mod_valuemapdoc{{/str}}
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    {{/can_generate}}
-
-    <!-- Fullscreen Toggle -->
-    <div class="fullscreen-controls mb-2">
-        <button id="toggle-fullscreen" class="btn btn-outline-secondary btn-sm">
-            🔳 {{#str}}fullscreen, mod_valuemapdoc{{/str}}
-        </button>
-    </div>
-
-    <!-- Table Container -->
+    <!-- MAIN TABLE -->
     <div id="valuemap-table-container" class="table-responsive">
         <div id="valuemap-table-js" 
              data-columns="{{{columns}}}"
              data-courseid="{{courseid}}"
              data-cmid="{{cmid}}"
              data-filtercmid="{{filtercmid}}">
-            <!-- Table will be rendered by JavaScript -->
         </div>
     </div>
-
-    <!-- Export Section -->
-    {{#can_generate}}
-    <div class="export-section mt-4">
-        <a href="{{{export_url}}}" class="btn btn-outline-info">
-            <i class="fa fa-download"></i> {{#str}}export_data, mod_valuemapdoc{{/str}}
-        </a>
-    </div>
-    {{/can_generate}}
-
-    <!-- Readonly Toggle (if available) -->
-    {{#readonly_toggle.show_toggle}}
-    <div class="readonly-toggle mt-3 p-2 bg-light border-top">
-        <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="readonlyToggle" 
-                   {{#readonly_toggle.current_readonly}}checked{{/readonly_toggle.current_readonly}}>
-            <label class="form-check-label" for="readonlyToggle">
-                {{#str}}readonly_mode, mod_valuemapdoc{{/str}}
-            </label>
-        </div>
-        <small class="text-muted">
-            {{#str}}readonly_mode_help, mod_valuemapdoc{{/str}}
-        </small>
-    </div>
-    {{/readonly_toggle.show_toggle}}
 </div>
 
 
-<!--
+
 <script type="application/json" id="valuemap-columns">
 {{{columns}}}
 </script>
 
-< !-- JavaScript Initialization 
-{ {#js} }
-// Initialize table when DOM is ready
-require(['mod_valuemapdoc/tabulatormap'], function(TabulatorMap) {
-    TabulatorMap.init();
-    
-    // Handle bulk actions visibility
-    const table = document.querySelector('#valuemap-table-js');
-    if (table) {
-        // Show/hide bulk actions based on selection
-        // This will be handled by the Tabulator instance
-    }
-    
-    // Handle readonly toggle
-    const readonlyToggle = document.querySelector('#readonlyToggle');
-    if (readonlyToggle) {
-        readonlyToggle.addEventListener('change', function() {
-            const url = new URL(window.location);
-            url.searchParams.set('readonly', this.checked ? '1' : '0');
-            window.location.href = url.toString();
-        });
-    }
-});
-{ {/js} }
--->
+

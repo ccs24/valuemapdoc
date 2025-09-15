@@ -99,15 +99,15 @@ define(['core/ajax', 'core/str', 'core/notification', 'jquery'], function(Ajax, 
                         // Status content
                         var statusBadge = '';
                         if (entry.status === 'pending') {
-                            statusBadge = '<span class="badge badge-warning"><i class="fa fa-clock-o"></i> Generowanie</span>';
+                            statusBadge = '<span class="badge bg-warning"><i class="fa fa-clock-o"></i> Generowanie</span>';
                         } else if (entry.status === 'error') {
-                            statusBadge = '<span class="badge badge-danger"><i class="fa fa-exclamation-triangle"></i> Błąd</span>';
+                            statusBadge = '<span class="badge bg-danger"><i class="fa fa-exclamation-triangle"></i> Błąd</span>';
                         } else {
                             // Check visibility
                             if (entry.visibility == 1) {
-                                statusBadge = '<span class="badge badge-warning"><i class="fa fa-lock"></i> Prywatny</span>';
+                                statusBadge = '<span class="badge bg-warning"><i class="fa fa-lock"></i> Prywatny</span>';
                             } else {
-                                statusBadge = '<span class="badge badge-success"><i class="fa fa-globe"></i> Współdzielony</span>';
+                                statusBadge = '<span class="badge bg-success"><i class="fa fa-globe"></i> Współdzielony</span>';
                             }
                         }
 
@@ -188,7 +188,7 @@ define(['core/ajax', 'core/str', 'core/notification', 'jquery'], function(Ajax, 
                         html += '<tr class="document-row" data-docid="' + entry.id + '">' +
                                '<td>' +
                                '<div class="d-flex align-items-center">' +
-                               '<i class="fa fa-file-text-o text-primary mr-2" aria-hidden="true"></i>' +
+                               '<i class="fa fa-file-text-o text-primary me-2" aria-hidden="true"></i>' +
                                '<div>' +
                                '<strong>' + entry.name + '</strong>' +
                                contentPreview +
@@ -196,7 +196,7 @@ define(['core/ajax', 'core/str', 'core/notification', 'jquery'], function(Ajax, 
                                '</div>' +
                                '</td>' +
                                '<td>' +
-                               '<span class="badge badge-secondary">' + templateName + '</span>' +
+                               '<span class="badge bg-secondary">' + templateName + '</span>' +
                                '</td>' +
                                '<td>' +
                                '<small>' + createdDate + '</small>' +

@@ -212,6 +212,15 @@ $tablecontent = [
         'is_user_choice' => !$readonly_forced && $readonly_mode,
         'can_edit' => true,
     ],
+
+    'preferences_url' => new moodle_url('/mod/valuemapdoc/preferences.php', [
+            'cmid' => $cm->id,
+            'returnurl' => $PAGE->url->out(false)
+     ]),
+    'import_url' => new moodle_url('/mod/valuemapdoc/import.php', ['id' => $id]),
+    'export_url' => new moodle_url('/mod/valuemapdoc/export.php', ['id' => $id]),
+    'content_url' => new moodle_url('/mod/valuemapdoc/view_content.php', ['id' => $id]),
+    
     
     // Field level information
     'field_level' => [
@@ -245,7 +254,6 @@ $PAGE->requires->js_call_amd('mod_valuemapdoc/tabulatormap', 'init', [
     'courseid' => $course->id,
     'cmid' => $cm->id,
     'filtercmid' => $selectedfilter,
-    'columns' => $columnsjson //$columns_for_js
 ]);
 
 

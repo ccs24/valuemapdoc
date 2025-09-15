@@ -19,11 +19,16 @@ define('mod_valuemapdoc/tabulatormap', [
 ) {
 
     return {
-        init: function(courseid, cmid, filtercmid, columns) {
-
+        init: function(courseid, cmid, filtercmid) {
             console.log('[tabulatormap] Module loaded');
             console.log('[tabulatormap] Course ID:', courseid, 'CM ID:', cmid, 'Filter CM ID:', filtercmid);
+
+        var columns = document.querySelector('#valuemap-columns').textContent;
             console.log('[DEBUG] Columns received:', columns);
+            if (!columns) {
+                console.warn('[tabulatormap] Columns not found');
+                return;
+            }
 
             // Parse columns if string
             if (typeof columns === 'string') {
@@ -209,7 +214,31 @@ define('mod_valuemapdoc/tabulatormap', [
                             bulkActions.style.display = 'none';
                         }
                     }
+                    var generateButton = document.querySelector('#generate-button');
+                    if (generateButton) {
+                            if (data.length > 0) {
+                                generateButton.disabled = false;
+                                generateButton.removeAttribute('disabled');
+                                generateButton.classList.remove('disabled');
+                            } else {
+                                generateButton.setAttribute('disabled', true);
+                                generateButton.classList.add('disabled');
+                                generateButton.disabled = true;
+                            }
+                    }   
                 });
+                // Po utworzeniu tabeli dodaj:
+table.on("cellClick", function(e, cell){
+    console.log('[DEBUG] Cell clicked:', cell.getField(), 'editable:', cell.getColumn().getDefinition().editable);
+});
+
+table.on("cellEditing", function(cell){
+    console.log('[DEBUG] Cell editing started:', cell.getField());
+});
+
+table.on("cellEditCancelled", function(cell){
+    console.log('[DEBUG] Cell edit cancelled:', cell.getField());
+});
 
                 // Handle cell editing
                 table.on("cellEdited", function(cell){
@@ -237,10 +266,10 @@ define('mod_valuemapdoc/tabulatormap', [
                 // Handle double-click to open edit form
                 table.on("rowDblClick", function(e, row){
                     var data = row.getData();
-                    if (data.ismaster === 1) {
+                    // if (data.ismaster === 1) {
                         var rateUrl = M.cfg.wwwroot + '/mod/valuemapdoc/edit.php?id=' + cmid + '&entryid=' + data.id;
                         window.open(rateUrl);
-                    }
+                    // }
                 });
 
                 /**

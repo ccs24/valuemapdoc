@@ -92,12 +92,4 @@ echo html_writer::div(
 
 // Display form
 $form->display();
-
-// Back link
-echo html_writer::div(
-    html_writer::link($returnurl, get_string('back_to_activity', 'mod_valuemapdoc'), 
-                     ['class' => 'btn btn-secondary']),
-    'text-center mt-3'
-);
-
 echo $OUTPUT->footer();
